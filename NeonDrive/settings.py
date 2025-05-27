@@ -40,7 +40,7 @@ SECRET_KEY = 'django-insecure-rwy%w=a7^(3088x2t4v5jlss1lvmtg+*6d-g6#h9ysf(+an905
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["neondriver.onrender.com"]
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
