@@ -13,20 +13,28 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
+DATABASES = {
+    'default': env.db(),  # Использует DATABASE_URL из переменных окружения
+}
 
 
 load_dotenv()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': 'db',
-        'PORT': '5432',
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': os.getenv('POSTGRES_DB'),
+#        'USER': os.getenv('POSTGRES_USER'),
+#        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+#        'HOST': 'db',
+#        'PORT': '5432',
+#    }
+#}
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,7 +48,7 @@ SECRET_KEY = 'django-insecure-rwy%w=a7^(3088x2t4v5jlss1lvmtg+*6d-g6#h9ysf(+an905
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["neondriver.onrender.com"]
+ALLOWED_HOSTS = ['neondriver.onrender.com']
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
