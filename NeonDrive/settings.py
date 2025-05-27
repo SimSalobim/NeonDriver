@@ -18,23 +18,18 @@ import environ
 env = environ.Env()
 environ.Env.read_env()
 
-DATABASES = {
-    'default': env.db(),  # Использует DATABASE_URL из переменных окружения
-}
-
-
 load_dotenv()
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': os.getenv('POSTGRES_DB'),
-#        'USER': os.getenv('POSTGRES_USER'),
-#        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#        'HOST': 'db',
-#        'PORT': '5432',
-#    }
-#}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '5432',
+    }
+}
  #Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
