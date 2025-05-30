@@ -6,24 +6,29 @@
 <p class="cyber-text hologram">Продажа <em>кибернетических машин</em> для улиц Ночного Города.</p>
 
 <div class="car-list">
-    {% for car in cars %}
+    <!-- Первая машина -->
+    {% if car1 %}
     <div class="car-item cyber-block">
-        <h2 class="car-name">{{ car.name }}</h2>
+        <h2 class="car-name">{{ car1.name }}</h2>
+        <img src="{% static 'images/car1.jpg' %}" alt="Kusanagi CT-3X" class="car-image glow">
 
-        {% if car.name == "KUZANAGI CT-3X" %}
-            <img src="{% static 'images/car1.jpg' %}" alt="Kusanagi CT-3X" class="car-image glow">
-        {% elif car.name == "QUADRA TURBO-R V-TECH" %}
-            <img src="{% static 'images/car2.jpg' %}" alt="Quadra Turbo-R" class="car-image glow">
-        {% endif %}
+        <div class="cyber-features">
+            <h3>ОСОБЕННОСТИ:</h3>
+            <ul>
+                <li><strong>Двигатель:</strong> Квантовый реактор V12</li>
+                <li><strong>Броня:</strong> Нанокевлар класса X</li>
+                <li><strong>Скорость:</strong> 450 км/ч</li>
+            </ul>
+        </div>
 
         <div class="like-system">
             {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car.user_has_liked_user %}liked{% endif %}"
-                        data-car-id="{{ car.id }}">
+                <button class="cyber-button like-btn {% if car1.user_has_liked user %}liked{% endif %}"
+                        data-car-id="{{ car1.id }}">
                     <span class="like-icon">
-                        {% if car.user_has_liked_user %}⚡️{% else %}🔋{% endif %}
+                        {% if car1.user_has_liked user %}⚡️{% else %}🔋{% endif %}
                     </span>
-                    <span class="like-count neon-cyan">{{ car.likes_count }}</span>
+                    <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
                 </button>
             {% else %}
                 <div class="login-to-vote">
@@ -32,7 +37,40 @@
             {% endif %}
         </div>
     </div>
-    {% endfor %}
+    {% endif %}
+
+    <!-- Вторая машина -->
+    {% if car2 %}
+    <div class="car-item cyber-block">
+        <h2 class="car-name">{{ car2.name }}</h2>
+        <img src="{% static 'images/car2.jpg' %}" alt="Quadra Turbo-R" class="car-image glow">
+
+        <div class="cyber-features">
+            <h3>ОСОБЕННОСТИ:</h3>
+            <ul>
+                <li><strong>Двигатель:</strong> Турбированный V8 с нейроинтерфейсом</li>
+                <li><strong>Броня:</strong> Плазменный щит</li>
+                <li><strong>Скорость:</strong> 380 км/ч</li>
+            </ul>
+        </div>
+
+        <div class="like-system">
+            {% if user.is_authenticated %}
+                <button class="cyber-button like-btn {% if car2.user_has_liked user %}liked{% endif %}"
+                        data-car-id="{{ car2.id }}">
+                    <span class="like-icon">
+                        {% if car2.user_has_liked user %}⚡️{% else %}🔋{% endif %}
+                    </span>
+                    <span class="like-count neon-cyan">{{ car2.likes_count }}</span>
+                </button>
+            {% else %}
+                <div class="login-to-vote">
+                    <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <script>

@@ -4,16 +4,25 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
 from .models import Feedback, Car
 from .forms import SignUpForm, LoginForm
-import requests
 import os
+import requests
+
 
 def home(request):
-    cars = Car.objects.all().prefetch_related('likes')
-    return render(request, 'main/home.html', {'cars': cars})
+    # Получаем конкретные машины по имени
+    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
+    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+
+    return render(request, 'main/home.html', {
+        'car1': car1,
+        'car2': car2
+    })
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -35,25 +44,35 @@ def toggle_like(request, car_id):
         'likes_count': car.likes.count()
     })
 
+
 def get_likes(request, car_id):
     car = get_object_or_404(Car, id=car_id)
     return JsonResponse({
         'liked': car.user_has_liked(request.user),
         'likes_count': car.likes_count
     })
-def cars(request):
-    cars = Car.objects.all()
-    return render(request, 'main/cars.html', {'cars': cars})
 
-from .forms import LoginForm
+
+def cars(request):
+    # Получаем конкретные машины по имени
+    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
+    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+
+    return render(request, 'main/cars.html', {
+        'car1': car1,
+        'car2': car2
+    })
+
 
 class CustomLoginView(LoginView):
     template_name = 'main/login.html'
-    form_class = LoginForm  # Используем форму для входа, а не регистрации
+    form_class = LoginForm
     redirect_authenticated_user = True
+
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('home')
+
 
 def register(request):
     if request.method == 'POST':
@@ -65,6 +84,7 @@ def register(request):
     else:
         form = SignUpForm()
     return render(request, 'main/register.html', {'form': form})
+
 
 def feedback(request):
     if request.method == 'POST':
