@@ -21,6 +21,10 @@ env = environ.Env()
 environ.Env.read_env()
 load_dotenv()
 
+if os.environ.get('RENDER'):
+    from django.core.management import call_command
+    call_command('migrate', '--noinput')
+
 # Читаем .env файл, если он существует
 if os.path.exists(os.path.join(BASE_DIR, '.env')):
     env.read_env(os.path.join(BASE_DIR, '.env'))

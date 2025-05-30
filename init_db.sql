@@ -1,0 +1,2 @@
+INSERT INTO main_car (name) VALUES ('KUZANAGI CT-3X');
+INSERT INTO main_car (name) VALUES ('QUADRA TURBO-R V-TECH');
