@@ -12,9 +12,6 @@ class Feedback(models.Model):
 
 class Car(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    engine = models.CharField(max_length=100, blank=True)
-    armor = models.CharField(max_length=100, blank=True)
-    speed = models.CharField(max_length=50, blank=True)
     likes = models.ManyToManyField(User, related_name='liked_cars', blank=True)
 
     def user_has_liked(self, user):
