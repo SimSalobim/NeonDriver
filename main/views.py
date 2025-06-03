@@ -1,7 +1,7 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db import OperationalError
+from django.db import OperationalError, ProgrammingError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -14,19 +14,22 @@ import os
 import requests
 
 
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.db import OperationalError, ProgrammingError
-from .models import Car
-
 def home(request):
     try:
+        # Пытаемся получить данные
         cars = Car.objects.all()
+
+        # Если данные есть - показываем страницу
         if cars.exists():
             return render(request, 'main/home.html', {'cars': cars})
-        return HttpResponse("Data initialization in progress... Please refresh in 1 minute.")
+
+        # Если таблица есть, но данных нет
+        return HttpResponse("Data is being initialized... Please refresh in 1 minute.")
+
     except (OperationalError, ProgrammingError):
-        return HttpResponse("Database is initializing... This may take a few minutes. Please wait.")
+        # Если таблицы еще нет
+        return HttpResponse("Database is initializing... This usually takes 2-3 minutes. Please wait.")
+
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
