@@ -1,12 +1,14 @@
 #!/bin/bash
 # render-build.sh
+pip install -r requirements.txt
+
 set -e
 
 # Применяем миграции
 python manage.py migrate
 
 # Собираем статику
-pip install -r requirements.txt && python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 
 # Запускаем сервер
 exec gunicorn NeonDrive.wsgi:application
