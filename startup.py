@@ -5,13 +5,16 @@ from django.db import connection
 
 
 def run_migrations():
-    """Выполняет миграции и создает начальные данные"""
     try:
-        # Проверяем, существует ли таблица
+        # Проверяем существование таблицы
         if "main_car" in connection.introspection.table_names():
             return
 
         print("Applying database migrations...")
+
+        # Запускаем слияние миграций
+        from merge_migrations import merge_migrations
+        merge_migrations()
 
         # Применяем миграции
         from django.core.management import execute_from_command_line
