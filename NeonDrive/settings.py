@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
+
 from dotenv import load_dotenv
 from pathlib import Path
 import environ
@@ -146,3 +148,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Ваши исходны
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
+    os.environ.setdefault('RUN_INIT', 'true')
