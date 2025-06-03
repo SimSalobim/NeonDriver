@@ -16,7 +16,7 @@ import requests
 
 def home(request):
     try:
-        # Пытаемся получить данные
+        # Попытка получить данные
         cars = Car.objects.all()
 
         # Если данные есть - показываем страницу
