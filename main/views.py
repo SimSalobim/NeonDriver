@@ -14,22 +14,19 @@ import os
 import requests
 
 
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.db import OperationalError, ProgrammingError
+from .models import Car
+
 def home(request):
     try:
-        # Попытка получить данные
         cars = Car.objects.all()
-
-        # Если данные есть - показываем страницу
         if cars.exists():
             return render(request, 'main/home.html', {'cars': cars})
-
-        # Если таблица есть, но данных нет
-        return HttpResponse("Initializing data... Please refresh in 30 seconds.")
-
-    except OperationalError:
-        # Если таблицы еще нет
-        return HttpResponse("Database is initializing... Please wait and refresh later.")
-
+        return HttpResponse("Data initialization in progress... Please refresh in 1 minute.")
+    except (OperationalError, ProgrammingError):
+        return HttpResponse("Database is initializing... This may take a few minutes. Please wait.")
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
