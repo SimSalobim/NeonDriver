@@ -1,7 +1,8 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import JsonResponse
+from django.db import OperationalError
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
@@ -14,15 +15,20 @@ import requests
 
 
 def home(request):
-    # Получаем конкретные машины по имени
-    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
-    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+    try:
+        # Пытаемся получить данные
+        cars = Car.objects.all()
 
-    return render(request, 'main/home.html', {
-        'car1': car1,
-        'car2': car2
-    })
+        # Если данные есть - показываем страницу
+        if cars.exists():
+            return render(request, 'main/home.html', {'cars': cars})
 
+        # Если таблица есть, но данных нет
+        return HttpResponse("Initializing data... Please refresh in 30 seconds.")
+
+    except OperationalError:
+        # Если таблицы еще нет
+        return HttpResponse("Database is initializing... Please wait and refresh later.")
 
 @csrf_exempt
 @require_http_methods(["POST"])
