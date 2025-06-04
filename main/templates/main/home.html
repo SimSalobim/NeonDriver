@@ -23,10 +23,10 @@
 
         <div class="like-system">
             {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car1.user_has_liked user %}liked{% endif %}"
+                <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
                         data-car-id="{{ car1.id }}">
                     <span class="like-icon">
-                        {% if car1.user_has_liked user %}⚡️{% else %}🔋{% endif %}
+                        {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
                     </span>
                     <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
                 </button>
@@ -55,20 +55,20 @@
         </div>
 
         <div class="like-system">
-            {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car2.user_has_liked user %}liked{% endif %}"
-                        data-car-id="{{ car2.id }}">
-                    <span class="like-icon">
-                        {% if car2.user_has_liked user %}⚡️{% else %}🔋{% endif %}
-                    </span>
-                    <span class="like-count neon-cyan">{{ car2.likes_count }}</span>
-                </button>
-            {% else %}
-                <div class="login-to-vote">
-                    <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
-                </div>
-            {% endif %}
+    {% if user.is_authenticated %}
+        <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
+                data-car-id="{{ car.id }}">
+            <span class="like-icon">
+                {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
+            </span>
+            <span class="like-count neon-cyan">{{ car.likes_count }}</span>
+        </button>
+    {% else %}
+        <div class="login-to-vote">
+            <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
         </div>
+    {% endif %}
+</div>
     </div>
     {% endif %}
 </div>

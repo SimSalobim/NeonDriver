@@ -88,6 +88,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'main.context_processors.car_request',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
