@@ -19,8 +19,7 @@ from django.db import OperationalError, ProgrammingError
 
 def home(request):
     cars = Car.objects.all()
-    Car.objects.get_or_create(name="KUZANAGI CT-3X")
-    Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+
     return render(request, 'main/home.html', {
         'cars': cars,
         'user': request.user  # Добавьте эту строку
