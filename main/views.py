@@ -14,10 +14,8 @@ import os
 import requests
 
 
-from django.shortcuts import render
-from django.http import HttpResponse
+
 from django.db import OperationalError, ProgrammingError
-from .models import Car
 
 def home(request):
     try:
