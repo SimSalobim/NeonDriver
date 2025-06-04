@@ -15,13 +15,8 @@ class MainConfig(AppConfig):
 
         def create_initial_data(sender, **kwargs):
             # Проверяем, что таблица существует
-            if not Car._meta.db_table in connection.introspection.table_names():
-                return
-
-            # Создаем данные только если их нет
-            if not Car.objects.exists():
-                Car.objects.get_or_create(name="KUZANAGI CT-3X")
-                Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+            Car.objects.get_or_create(name="KUZANAGI CT-3X")
+            Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
 
         # Подключаем сигнал
         post_migrate.connect(create_initial_data, sender=self)
