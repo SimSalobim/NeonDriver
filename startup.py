@@ -4,10 +4,6 @@ import sys
 import time
 from django.core.management import execute_from_command_line
 
-<<<<<<< HEAD
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
-application = get_wsgi_application()
-=======
 
 def run_migrations():
     """Выполняет миграции и создает начальные данные"""
@@ -39,4 +35,3 @@ def run_migrations():
     except Exception as e:
         print(f"Initialization failed: {str(e)}")
         return False
->>>>>>> parent of 7691065 (б)
