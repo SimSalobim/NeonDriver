@@ -5,10 +5,14 @@ from django.db import connection
 
 
 def run_migrations():
+    """Выполняет миграции и создает начальные данные"""
     try:
-        print("Checking database status...")
+        print("Database initialization started...")
 
-        # Проверяем существование таблицы через raw SQL
+        # Применяем миграции
+        call_command("migrate")
+
+        # Проверяем существование таблицы
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1 FROM main_car LIMIT 1")
@@ -16,11 +20,6 @@ def run_migrations():
             return
         except Exception:
             pass
-
-        # Применяем миграции
-        print("Applying migrations...")
-        call_command("migrate")
-
         # Создаем начальные данные
         print("Creating initial data...")
         from main.models import Car
@@ -30,8 +29,8 @@ def run_migrations():
         print("Database initialization complete!")
     except Exception as e:
         print(f"Initialization failed: {e}")
-        # Повторная попытка
+        # Повторная попытка миграций
         try:
             call_command("migrate")
         except:
-            print("Retry failed")
+            print("Migration retry failed")

@@ -18,11 +18,13 @@ import requests
 from django.db import OperationalError, ProgrammingError
 
 def home(request):
-    cars = Car.objects.all()
-    return render(request, 'main/home.html', {
-        'cars': cars,
-        'user': request.user  # Добавьте эту строку
-    })
+    try:
+        cars = Car.objects.all()
+        if cars.exists():
+            return render(request, 'main/home.html', {'cars': cars})
+        return HttpResponse("Data initialization in progress... Please refresh in 1 minute.")
+    except (OperationalError, ProgrammingError):
+        return HttpResponse("Database is initializing... This may take a few minutes. Please wait.")
 
 @csrf_exempt
 @require_http_methods(["POST"])
