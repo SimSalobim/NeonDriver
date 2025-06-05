@@ -17,12 +17,21 @@ import requests
 
 from django.db import OperationalError, ProgrammingError
 
+
 def home(request):
-    cars = Car.objects.all()
+    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
+    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+
+    # Добавляем информацию о лайках для текущего пользователя
+    if car1:
+        car1.user_has_liked_value = car1.user_has_liked(request.user)
+    if car2:
+        car2.user_has_liked_value = car2.user_has_liked(request.user)
 
     return render(request, 'main/home.html', {
-        'cars': cars,
-        'user': request.user  # Добавьте эту строку
+        'car1': car1,
+        'car2': car2,
+        'user': request.user
     })
 
 @csrf_exempt
@@ -49,10 +58,9 @@ def toggle_like(request, car_id):
 def get_likes(request, car_id):
     car = get_object_or_404(Car, id=car_id)
     return JsonResponse({
-        'liked': car.user_has_liked(request.user),
+        'liked': car.user_has_liked(request.user),  # Передаем пользователя
         'likes_count': car.likes_count
     })
-
 
 def cars(request):
     # Получаем конкретные машины по имени

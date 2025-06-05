@@ -23,13 +23,13 @@
 
         <div class="like-system">
             {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
-                        data-car-id="{{ car1.id }}">
-                    <span class="like-icon">
-                        {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
-                    </span>
-                    <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
-                </button>
+   <button class="cyber-button like-btn {% if car1.user_has_liked_value %}liked{% endif %}"
+        data-car-id="{{ car1.id }}">
+    <span class="like-icon">
+        {% if car1.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
+    </span>
+    <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
+</button>
             {% else %}
                 <div class="login-to-vote">
                     <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
@@ -40,7 +40,6 @@
 
 
     <!-- Вторая машина -->
-    {% if car2 %}
     <div class="car-item cyber-block">
         <h2 class="car-name">{{ car2.name }}</h2>
         <img src="{% static 'images/car2.jpg' %}" alt="Quadra Turbo-R" class="car-image glow">
@@ -56,18 +55,17 @@
 
         <div class="like-system">
     {% if user.is_authenticated %}
-        <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
-                data-car-id="{{ car.id }}">
-            <span class="like-icon">
-                {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
-            </span>
-            <span class="like-count neon-cyan">{{ car.likes_count }}</span>
-        </button>
+        <button class="cyber-button like-btn {% if car2.user_has_liked_value %}liked{% endif %}"
+        data-car-id="{{ car2.id }}">
+    <span class="like-icon">
+        {% if car2.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
+    </span>
+    <span class="like-count neon-cyan">{{ car2.likes_count }}</span>
+</button>
     {% else %}
         <div class="login-to-vote">
             <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
         </div>
-    {% endif %}
 </div>
     </div>
     {% endif %}
@@ -108,10 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Ошибка сети');
             const data = await response.json();
-            const url = button.dataset.url;
-
-
-
             updateLikeUI(carId, data);
             likeChannel.postMessage({ carId, ...data });
 
