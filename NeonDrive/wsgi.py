@@ -6,7 +6,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 
 application = get_wsgi_application()
 
-# Инициализация базы данных ПОСЛЕ создания приложения
 try:
     from startup import run_migrations
     run_migrations()

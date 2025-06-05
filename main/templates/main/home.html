@@ -6,7 +6,6 @@
 <p class="cyber-text hologram">Продажа <em>кибернетических машин</em> для улиц Ночного Города.</p>
 
 <div class="car-list">
-    <!-- Первая машина -->
 
     <div class="car-item cyber-block">
         <h2 class="car-name">{{ car1.name }}</h2>
@@ -38,8 +37,6 @@
         </div>
     </div>
 
-
-    <!-- Вторая машина -->
     <div class="car-item cyber-block">
         <h2 class="car-name">{{ car2.name }}</h2>
         <img src="{% static 'images/car2.jpg' %}" alt="Quadra Turbo-R" class="car-image glow">
@@ -75,8 +72,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const likeChannel = new BroadcastChannel('likes_updates');
     let isProcessing = false;
-
-    // Функция для обновления UI
     const updateLikeUI = (carId, data) => {
         const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
         buttons.forEach(button => {
@@ -85,15 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
             button.querySelector('.like-count').textContent = data.likes_count;
         });
     };
-
-    // Обработчик кликов
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
         if (!button || isProcessing) return;
-
         isProcessing = true;
         const carId = button.dataset.carId;
-
         try {
             const response = await fetch(`/toggle-like/${carId}/`, {
                 method: 'POST',
@@ -103,25 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 credentials: 'same-origin'
             });
-
             if (!response.ok) throw new Error('Ошибка сети');
             const data = await response.json();
             updateLikeUI(carId, data);
             likeChannel.postMessage({ carId, ...data });
-
         } catch (error) {
             console.error('Ошибка:', error);
         } finally {
             isProcessing = false;
         }
     });
-
-    // Слушатель сообщений из других вкладок
     likeChannel.onmessage = (event) => {
         updateLikeUI(event.data.carId, event.data);
     };
-
-    // Инициализация состояний
     document.querySelectorAll('.like-btn').forEach(button => {
         const carId = button.dataset.carId;
         fetch(`/get-likes/${carId}/`)
