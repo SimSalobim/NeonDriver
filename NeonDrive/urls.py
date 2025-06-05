@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from main.views import toggle_like
+
 urlpatterns = [
+    path('toggle-like/<int:car_id>/', toggle_like, name='toggle_like'),
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
 ]

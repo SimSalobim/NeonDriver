@@ -108,6 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Ошибка сети');
             const data = await response.json();
+            const url = button.dataset.url;
+
+
 
             updateLikeUI(carId, data);
             likeChannel.postMessage({ carId, ...data });

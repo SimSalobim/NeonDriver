@@ -150,5 +150,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://neondriver.onrender.com',
+    'http://localhost:8000'
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
+
