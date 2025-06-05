@@ -1,5 +1,7 @@
 # startup.py
 import os
+
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.db import connection
 
@@ -11,7 +13,10 @@ def run_migrations():
 
         # Применяем миграции
         call_command("migrate")
-
+        User = get_user_model()
+        username = os.environ.get('ADMIN_USER', 'admin')
+        email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+        password = os.environ.get('ADMIN_PASSWORD', 'defaultpassword')
         # Проверяем существование таблицы
         try:
             with connection.cursor() as cursor:
