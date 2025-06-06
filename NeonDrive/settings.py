@@ -28,14 +28,15 @@ load_dotenv()
 if os.path.exists(os.path.join(BASE_DIR, '.env')):
     env.read_env(os.path.join(BASE_DIR, '.env'))
 
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=True
-        )
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=True
+    )
+}
+DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

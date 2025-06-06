@@ -5,7 +5,6 @@ services:
     plan: free
     buildCommand: |
         pip install -r requirements.txt
-        python manage.py makemigrations channels_postgres 
         python manage.py migrate
     startCommand: daphne NeonDrive.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
@@ -19,8 +18,20 @@ services:
         value: 3.10.6
       - key: DISABLE_COLLECTSTATIC
         value: 1
-      - key: CHANNEL_LAYERS
-        value: postgres
+      - key: POSTGRES_DB
+        value: neondrive
+      - key: POSTGRES_USER
+        value: neondrive
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: neondrive-db
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: neondrive-db
+          property: host
+      - key: POSTGRES_PORT
+        value: 5432
 
 databases:
   - name: neondrive-db
