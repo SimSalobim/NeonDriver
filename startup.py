@@ -7,11 +7,6 @@ from django.db import connection
 
 def run_migrations():
     try:
-        table_exists = "main_car" in connection.introspection.table_names()
-
-        if table_exists:
-            print("✅ Database already initialized")
-            return
         print("🚀 Starting database initialization...")
 
         # Проверяем существование таблицы
@@ -25,31 +20,21 @@ def run_migrations():
 
         # Применяем миграции
         print("🔄 Applying migrations...")
-        call_command("migrate")
+        call_command("migrate", interactive=False)
 
         # Создаем начальные данные
         print("✨ Creating initial data...")
         from main.models import Car
 
-        # Создаем первый автомобиль
-        car1, created1 = Car.objects.get_or_create(name="KUZANAGI CT-3X")
-        if created1:
-            print(f"✅ Car 1 created successfully: {car1.name}")
-        else:
-            print(f"ℹ️ Car 1 already exists: {car1.name}")
+        # Создаем автомобили
+        Car.objects.get_or_create(name="KUZANAGI CT-3X")
+        Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
 
-        # Создаем второй автомобиль
-        car2, created2 = Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
-        if created2:
-            print(f"✅ Car 2 created successfully: {car2.name}")
-        else:
-            print(f"ℹ️ Car 2 already exists: {car2.name}")
-
-        # Проверяем итог
-        car_count = Car.objects.count()
-        print(f"🎉 Database initialization complete! Total cars: {car_count}")
+        print("🎉 Database initialization complete!")
 
     except Exception as e:
-        print(f"🔥 Initialization failed: {str(e)}")
+        print(f"🔥 Initialization error: {str(e)}")
         import traceback
         traceback.print_exc()
+
+run_migrations()

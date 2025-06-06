@@ -15,14 +15,21 @@ from asgiref.sync import async_to_sync
 
 
 def home(request):
+    try:
+        car1 = Car.objects.get(name="KUZANAGI CT-3X")
+        car2 = Car.objects.get(name="QUADRA TURBO-R V-TECH")
+    except Car.DoesNotExist:
+        # Если машины не найдены, создаем пустые объекты
+        car1 = Car(name="KUZANAGI CT-3X")
+        car2 = Car(name="QUADRA TURBO-R V-TECH")
 
-    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
-    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
-
-    if car1:
+    # Добавляем информацию о лайках
+    if request.user.is_authenticated:
         car1.user_has_liked_value = car1.user_has_liked(request.user)
-    if car2:
         car2.user_has_liked_value = car2.user_has_liked(request.user)
+    else:
+        car1.user_has_liked_value = False
+        car2.user_has_liked_value = False
 
     return render(request, 'main/home.html', {
         'car1': car1,
