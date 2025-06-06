@@ -11,31 +11,50 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from pathlib import Path
-import dj_database_url
-from dotenv import load_dotenv
-load_dotenv()
 import sys
-from django.core.wsgi import get_wsgi_application
-from pathlib import Path
 
-# Добавьте путь к проекту
+from dotenv import load_dotenv
+from pathlib import Path
+import environ
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
+env = environ.Env()
+environ.Env.read_env()
+load_dotenv()
 
+# Читаем .env файл, если он существует
+if os.path.exists(os.path.join(BASE_DIR, '.env')):
+    env.read_env(os.path.join(BASE_DIR, '.env'))
 
-
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-rwy%w=a7^(3088x2t4v5jlss1lvmtg+*6d-g6#h9ysf(+an905'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = ['neondriver.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['neondriver.onrender.com']
 
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 # Application definition
+
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
@@ -45,13 +64,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'channels_postgres',
     'main',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,57 +84,44 @@ ROOT_URLCONF = 'NeonDrive.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'main.context_processors.car_request',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-# WebSocket и ASGI настройки
-ASGI_APPLICATION = 'NeonDrive.asgi.application'
-
-# Замените блок DATABASES на:
-if os.environ.get('RENDER'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'neondrive',
-            'USER': 'neondrive_user',
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-            'HOST': os.environ.get('POSTGRES_HOST'),
-            'PORT': '5432',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
-# Обновите CHANNEL_LAYERS:
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "neondrive",
-            "USER": "neondriver_user",
-            "PASSWORD": "qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5",
-            "HOST": "dpg-d11ifqodl3ps73cr2bng-a",
-            "PORT": "5432",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
+            "PORT": os.getenv("POSTGRES_PORT"),
         },
     },
 }
+WSGI_APPLICATION = 'NeonDrive.wsgi.application'
+
+ASGI_APPLICATION = 'NeonDrive.asgi.application'
+
+
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
 
 # Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -131,34 +137,44 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Internationalization
-LANGUAGE_CODE = 'ru-ru'
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
 
-# Static files
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Ваши исходные статические файлы
+
+
 
 # Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Authentication settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-# Security settings
 CSRF_TRUSTED_ORIGINS = [
     'https://neondriver.onrender.com',
     'http://localhost:8000'
 ]
+
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-# Для работы с Telegram
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
+if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
+    os.environ.setdefault('RUN_INIT', 'true')
+

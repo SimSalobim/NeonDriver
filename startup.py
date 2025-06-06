@@ -1,73 +1,50 @@
+
 import os
 import sys
-import time
-import django
 from django.core.management import call_command
 from django.db import connection
-from django.db.utils import OperationalError
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 
 
-def wait_for_db():
-    """Ожидание доступности базы данных."""
-    max_retries = 10
-    retry_delay = 2  # секунды между попытками
-
-    for i in range(max_retries):
-        try:
-            connection.ensure_connection()
-            print("✅ Database connection established")
-            return True
-        except OperationalError:
-            print(f"⚠️ Database not ready, retrying... ({i + 1}/{max_retries})")
-            time.sleep(retry_delay)
-    print("❌ Max retries reached. Database still not available.")
-    return False
-
-
-def run_initialization():
-    """Основная логика инициализации."""
+def run_migrations():
     try:
         print("🚀 Starting database initialization...")
 
-        # Проверка существования таблицы
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT EXISTS (
-                    SELECT 1 FROM information_schema.tables 
-                    WHERE table_name = 'main_car'
-                )
-            """)
-            table_exists = cursor.fetchone()[0]
-
-        if table_exists:
+        # Проверяем существование таблицы
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM main_car LIMIT 1")
             print("✅ Database already initialized")
             return
+        except Exception as e:
+            print(f"⚠️ Database not ready: {str(e)}")
 
-        # Применение миграций
+        # Применяем миграции
         print("🔄 Applying migrations...")
-        call_command("migrate", interactive=False)
+        call_command("migrate")
 
-        # Создание начальных данных
+        # Создаем начальные данные
         print("✨ Creating initial data...")
         from main.models import Car
-        Car.objects.get_or_create(name="KUZANAGI CT-3X")
-        Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
 
-        print("🎉 Database initialization complete!")
+        # Создаем первый автомобиль
+        car1, created1 = Car.objects.get_or_create(name="KUZANAGI CT-3X")
+        if created1:
+            print(f"✅ Car 1 created successfully: {car1.name}")
+        else:
+            print(f"ℹ️ Car 1 already exists: {car1.name}")
+
+        # Создаем второй автомобиль
+        car2, created2 = Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+        if created2:
+            print(f"✅ Car 2 created successfully: {car2.name}")
+        else:
+            print(f"ℹ️ Car 2 already exists: {car2.name}")
+
+        # Проверяем итог
+        car_count = Car.objects.count()
+        print(f"🎉 Database initialization complete! Total cars: {car_count}")
+
     except Exception as e:
-        print(f"🔥 Initialization error: {str(e)}")
+        print(f"🔥 Initialization failed: {str(e)}")
         import traceback
         traceback.print_exc()
-
-
-if __name__ == "__main__":
-    # Инициализация Django
-    django.setup()
-
-    # Ожидание БД и запуск инициализации
-    if wait_for_db():
-        run_initialization()
-    else:
-        sys.exit(1)

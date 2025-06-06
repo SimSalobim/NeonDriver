@@ -15,21 +15,13 @@ from asgiref.sync import async_to_sync
 
 
 def home(request):
-    try:
-        car1 = Car.objects.get(name="KUZANAGI CT-3X")
-        car2 = Car.objects.get(name="QUADRA TURBO-R V-TECH")
-    except Car.DoesNotExist:
-        # Если машины не найдены, создаем пустые объекты
-        car1 = Car(name="KUZANAGI CT-3X")
-        car2 = Car(name="QUADRA TURBO-R V-TECH")
+    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
+    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
 
-    # Добавляем информацию о лайках
-    if request.user.is_authenticated:
+    if car1:
         car1.user_has_liked_value = car1.user_has_liked(request.user)
+    if car2:
         car2.user_has_liked_value = car2.user_has_liked(request.user)
-    else:
-        car1.user_has_liked_value = False
-        car2.user_has_liked_value = False
 
     return render(request, 'main/home.html', {
         'car1': car1,
@@ -70,6 +62,13 @@ def toggle_like(request, car_id):
     })
 
 
+def get_likes(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+    return JsonResponse({
+        'liked': car.user_has_liked(request.user),  # Передаем пользователя
+        'likes_count': car.likes_count
+    })
+
 def cars(request):
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
@@ -101,15 +100,7 @@ def register(request):
         form = SignUpForm()
     return render(request, 'main/register.html', {'form': form})
 
-def get_likes(request, car_id):
-    try:
-        car = get_object_or_404(Car, id=car_id)
-        return JsonResponse({
-            'liked': car.user_has_liked(request.user),
-            'likes_count': car.likes.count()
-        })
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+
 def feedback(request):
     if request.method == 'POST':
         name = request.POST.get('name')
