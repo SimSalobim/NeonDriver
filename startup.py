@@ -10,13 +10,15 @@ def run_migrations():
     try:
         print("🚀 Starting database initialization...")
 
-        # Проверяем подключение к базе данных
+        # Проверка подключения к базе данных
+        from django.db import connection
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT 1")
-            print("✅ Database connection established")
-        except OperationalError as e:
-            print(f"❌ Database connection error: {e}")
+                cursor.execute("SELECT version()")
+                db_version = cursor.fetchone()
+                print(f"✅ PostgreSQL version: {db_version[0]}")
+        except Exception as e:
+            print(f"❌ Database connection failed: {e}")
             raise
 
         # Применяем миграции

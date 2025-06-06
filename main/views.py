@@ -1,19 +1,26 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Feedback, Car
+from .models import Feedback
 from .forms import SignUpForm, LoginForm
 import os
 import requests
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Car
 
-
+def get_likes(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+    return JsonResponse({
+        'liked': car.user_has_liked(request.user),
+        'likes_count': car.likes_count
+    })
 def home(request):
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()

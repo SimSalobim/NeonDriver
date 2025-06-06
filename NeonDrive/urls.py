@@ -17,9 +17,22 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from main.views import toggle_like
+from main.views import toggle_like, get_likes, CustomLoginView, CustomLogoutView, home, feedback, register
+
+
+class Сars:
+    pass
+
 
 urlpatterns = [
+    path('', home, name='home'),
+    path('toggle-like/<int:car_id>/', toggle_like, name='toggle_like'),
+    path('get-likes/<int:car_id>/', get_likes, name='get_likes'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('cars/', Сars, name='cars'),
+    path('register/', register, name='register'),
+    path('feedback/', feedback, name='feedback'),
     path('toggle-like/<int:car_id>/', toggle_like, name='toggle_like'),
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
