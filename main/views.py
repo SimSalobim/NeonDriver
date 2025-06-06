@@ -1,34 +1,35 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Feedback
+from .models import Feedback, Car
 from .forms import SignUpForm, LoginForm
 import os
 import requests
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import Car
 
-def get_likes(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    return JsonResponse({
-        'liked': car.user_has_liked(request.user),
-        'likes_count': car.likes_count
-    })
+
 def home(request):
-    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
-    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+    try:
+        car1 = Car.objects.get(name="KUZANAGI CT-3X")
+        car2 = Car.objects.get(name="QUADRA TURBO-R V-TECH")
+    except Car.DoesNotExist:
+        # Если машины не найдены, создаем пустые объекты
+        car1 = Car(name="KUZANAGI CT-3X")
+        car2 = Car(name="QUADRA TURBO-R V-TECH")
 
-    if car1:
+    # Добавляем информацию о лайках
+    if request.user.is_authenticated:
         car1.user_has_liked_value = car1.user_has_liked(request.user)
-    if car2:
         car2.user_has_liked_value = car2.user_has_liked(request.user)
+    else:
+        car1.user_has_liked_value = False
+        car2.user_has_liked_value = False
 
     return render(request, 'main/home.html', {
         'car1': car1,
@@ -41,50 +42,42 @@ def home(request):
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    try:
-        car = get_object_or_404(Car, id=car_id)
-        user = request.user
-        liked = False
+    car = get_object_or_404(Car, id=car_id)
+    user = request.user
+    liked = False
 
-        if car.likes.filter(id=user.id).exists():
-            car.likes.remove(user)
-        else:
-            car.likes.add(user)
-            liked = True
+    if car.likes.filter(id=user.id).exists():
+        car.likes.remove(user)
+    else:
+        car.likes.add(user)
+        liked = True
 
-        # Сохраняем обновленное состояние
-        car.refresh_from_db()
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "likes_group",
+        {
+            "type": "like_update",
+            "car_id": car_id,
+            "liked": liked,
+            "likes_count": car.likes.count()
+        }
+    )
 
-        # Отправка через WebSocket
-        try:
-            channel_layer = get_channel_layer()
-            if channel_layer:
-                async_to_sync(channel_layer.group_send)(
-                    "likes_group",
-                    {
-                        "type": "like_update",
-                        "car_id": car_id,
-                        "liked": liked,
-                        "likes_count": car.likes.count()
-                    }
-                )
-            else:
-                print("⚠️ Channel layer is not available")
-        except Exception as e:
-            print(f"⚠️ WebSocket error: {e}")
+    return JsonResponse({
+        'status': 'success',
+        'liked': liked,
+        'likes_count': car.likes.count()
+    })
 
-        return JsonResponse({
-            'status': 'success',
-            'liked': liked,
-            'likes_count': car.likes.count()
-        })
 
-    except Exception as e:
-        print(f"🔥 Critical error in toggle_like: {e}")
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
+def cars(request):
+    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
+    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
+
+    return render(request, 'main/cars.html', {
+        'car1': car1,
+        'car2': car2
+    })
 
 
 class CustomLoginView(LoginView):
@@ -108,7 +101,15 @@ def register(request):
         form = SignUpForm()
     return render(request, 'main/register.html', {'form': form})
 
-
+def get_likes(request, car_id):
+    try:
+        car = get_object_or_404(Car, id=car_id)
+        return JsonResponse({
+            'liked': car.user_has_liked(request.user),
+            'likes_count': car.likes.count()
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 def feedback(request):
     if request.method == 'POST':
         name = request.POST.get('name')
