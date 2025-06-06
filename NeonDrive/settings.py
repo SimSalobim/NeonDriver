@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'channels',
+    'daphne',
 ]
 
 MIDDLEWARE = [
@@ -95,7 +97,22 @@ TEMPLATES = [
     },
 ]
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+        "CONFIG": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
+            "PORT": os.getenv("POSTGRES_PORT"),
+        },
+    },
+}
 WSGI_APPLICATION = 'NeonDrive.wsgi.application'
+
+ASGI_APPLICATION = 'NeonDrive.asgi.application'
 
 
 # Database

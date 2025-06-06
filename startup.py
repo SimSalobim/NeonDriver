@@ -1,4 +1,4 @@
-# startup.py
+
 import os
 import sys
 from django.core.management import call_command
@@ -47,4 +47,4 @@ def run_migrations():
     except Exception as e:
         print(f"🔥 Initialization failed: {str(e)}")
         import traceback
-        traceback.print_exc()  # Выводим полный стек ошибки
+        traceback.print_exc()

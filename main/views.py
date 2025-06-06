@@ -1,28 +1,23 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db import OperationalError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-import multiprocessing.connection
 from .models import Feedback, Car
 from .forms import SignUpForm, LoginForm
 import os
 import requests
-
-
-
-from django.db import OperationalError, ProgrammingError
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 def home(request):
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
 
-    # Добавляем информацию о лайках для текущего пользователя
     if car1:
         car1.user_has_liked_value = car1.user_has_liked(request.user)
     if car2:
@@ -33,6 +28,7 @@ def home(request):
         'car2': car2,
         'user': request.user
     })
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -47,6 +43,17 @@ def toggle_like(request, car_id):
     else:
         car.likes.add(user)
         liked = True
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "likes_group",
+        {
+            "type": "like_update",
+            "car_id": car_id,
+            "liked": liked,
+            "likes_count": car.likes.count()
+        }
+    )
 
     return JsonResponse({
         'status': 'success',
@@ -63,7 +70,6 @@ def get_likes(request, car_id):
     })
 
 def cars(request):
-    # Получаем конкретные машины по имени
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
 
