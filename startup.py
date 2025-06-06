@@ -7,6 +7,11 @@ from django.db import connection
 
 def run_migrations():
     try:
+        table_exists = "main_car" in connection.introspection.table_names()
+
+        if table_exists:
+            print("✅ Database already initialized")
+            return
         print("🚀 Starting database initialization...")
 
         # Проверяем существование таблицы

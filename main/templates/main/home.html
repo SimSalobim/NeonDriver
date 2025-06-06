@@ -23,12 +23,12 @@
         <div class="like-system">
             {% if user.is_authenticated %}
                 <button class="cyber-button like-btn {% if car1.user_has_liked_value %}liked{% endif %}"
-                        data-car-id="{{ car1.id }}">
-                    <span class="like-icon">
-                        {% if car1.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
-                    </span>
-                    <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
-                </button>
+        data-car-id="{{ car1.id }}">
+    <span class="like-icon">
+        {% if car1.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
+    </span>
+    <span class="like-count neon-cyan">{{ car1.likes.count }}</span>
+</button>
             {% else %}
                 <div class="login-to-vote">
                     <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
@@ -54,12 +54,12 @@
         <div class="like-system">
             {% if user.is_authenticated %}
                 <button class="cyber-button like-btn {% if car2.user_has_liked_value %}liked{% endif %}"
-                        data-car-id="{{ car2.id }}">
-                    <span class="like-icon">
-                        {% if car2.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
-                    </span>
-                    <span class="like-count neon-cyan">{{ car2.likes_count }}</span>
-                </button>
+        data-car-id="{{ car2.id }}">
+    <span class="like-icon">
+        {% if car2.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
+    </span>
+    <span class="like-count neon-cyan">{{ car2.likes.count }}</span>
+</button>
             {% else %}
                 <div class="login-to-vote">
                     <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
@@ -71,18 +71,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const likeChannel = new BroadcastChannel('likes_updates');
+    let isProcessing = false;
 
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-
-    const socket = new WebSocket(`${wsProtocol}${window.location.host}/ws/likes/`);
-
-    socket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        updateLikeUI(data.car_id, {
-            liked: data.liked,
-            likes_count: data.likes_count
-        });
-    };
+    // Функция для обновления UI
     const updateLikeUI = (carId, data) => {
         const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
         buttons.forEach(button => {
@@ -91,11 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
             button.querySelector('.like-count').textContent = data.likes_count;
         });
     };
+
+    // Обработчик кликов
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
-        if (!button) return;
+        if (!button || isProcessing) return;
 
+        isProcessing = true;
         const carId = button.dataset.carId;
+
         try {
             const response = await fetch(`/toggle-like/${carId}/`, {
                 method: 'POST',
@@ -107,9 +103,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) throw new Error('Ошибка сети');
+            const data = await response.json();
+
+            updateLikeUI(carId, data);
+            likeChannel.postMessage({ carId, ...data });
+
         } catch (error) {
             console.error('Ошибка:', error);
+        } finally {
+            isProcessing = false;
         }
+    });
+
+    // Слушатель сообщений из других вкладок
+    likeChannel.onmessage = (event) => {
+        updateLikeUI(event.data.carId, event.data);
+    };
+
+    // Инициализация состояний
+    document.querySelectorAll('.like-btn').forEach(button => {
+        const carId = button.dataset.carId;
+        fetch(`/get-likes/${carId}/`)
+            .then(response => response.json())
+            .then(data => updateLikeUI(carId, data))
+            .catch(error => console.error('Ошибка при получении лайков:', error));
     });
 
     function getCookie(name) {

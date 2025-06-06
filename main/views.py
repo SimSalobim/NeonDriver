@@ -15,6 +15,7 @@ from asgiref.sync import async_to_sync
 
 
 def home(request):
+
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
 
@@ -100,7 +101,15 @@ def register(request):
         form = SignUpForm()
     return render(request, 'main/register.html', {'form': form})
 
-
+def get_likes(request, car_id):
+    try:
+        car = get_object_or_404(Car, id=car_id)
+        return JsonResponse({
+            'liked': car.user_has_liked(request.user),
+            'likes_count': car.likes.count()
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 def feedback(request):
     if request.method == 'POST':
         name = request.POST.get('name')
