@@ -59,4 +59,10 @@ def run_initialization():
 
 
 if __name__ == "__main__":
-    run_initialization()
+    if wait_for_db():
+        if run_initialization():
+            sys.exit(0)  # Успешное завершение
+        else:
+            sys.exit(1)  # Ошибка инициализации
+    else:
+        sys.exit(2)  # Ошибка подключения к БД

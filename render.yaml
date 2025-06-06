@@ -6,9 +6,8 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python merge_migrations.py
-    startCommand: |
-      python startup.py
-      daphne NeonDrive.asgi:application --port $PORT --bind 0.0.0.0
+      chmod +x run.sh  # Делаем скрипт исполняемым
+    startCommand: ./run.sh  # Запускаем наш скрипт
     envVars:
       - key: POSTGRES_DB
         value: neondriver
