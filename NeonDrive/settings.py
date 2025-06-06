@@ -28,16 +28,22 @@ load_dotenv()
 if os.path.exists(os.path.join(BASE_DIR, '.env')):
     env.read_env(os.path.join(BASE_DIR, '.env'))
 
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+if DATABASE_URL:
+    db_config = dj_database_url.parse(DATABASE_URL)
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+            "CONFIG": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": db_config['NAME'],
+                "USER": db_config['USER'],
+                "PASSWORD": db_config['PASSWORD'],
+                "HOST": db_config['HOST'],
+                "PORT": db_config['PORT'],
+            },
+        },
     }
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -104,10 +110,10 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DB_NAME", os.environ.get("POSTGRES_DB")),
-            "USER": os.environ.get("DB_USER", os.environ.get("POSTGRES_USER")),
-            "PASSWORD": os.environ.get("DB_PASSWORD", os.environ.get("POSTGRES_PASSWORD")),
-            "HOST": os.environ.get("DB_HOST", os.environ.get("POSTGRES_HOST")),
+            "NAME": os.environ.get("DB_NAME", os.environ.get("POSTGRES_DB","neondriver")),
+            "USER": os.environ.get("DB_USER", os.environ.get("POSTGRES_USER","neondriver_user")),
+            "PASSWORD": os.environ.get("DB_PASSWORD", os.environ.get("POSTGRES_PASSWORD","qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5")),
+            "HOST": os.environ.get("DB_HOST", os.environ.get("POSTGRES_HOST","dpg-d11ifqodl3ps73cr2bng-a")),
             "PORT": os.environ.get("DB_PORT", os.environ.get("POSTGRES_PORT", "5432")),
         },
     },
