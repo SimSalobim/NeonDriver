@@ -1,9 +1,8 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
-from .views import *
+from .views import toggle_like, get_likes, cars, CustomLoginView, CustomLogoutView, register, feedback
 
 urlpatterns = [
-    path('', home, name='home'),
     path('toggle-like/<int:car_id>/', toggle_like, name='toggle_like'),
     path('get-likes/<int:car_id>/', get_likes, name='get_likes'),
     path('cars/', cars, name='cars'),

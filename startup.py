@@ -1,68 +1,54 @@
 import os
 import sys
-import time
-import django
 from django.core.management import call_command
-from django.db import connection
-from django.db.utils import OperationalError
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
-django.setup()  # Важно: инициализация Django до работы с моделями
+from django.db import connection, OperationalError
 
 
-def wait_for_db():
-    """Ожидание доступности базы данных с подробным выводом."""
-    max_retries = 15
-    retry_delay = 3
-
-    print(f"🕒 Ожидание подключения к базе данных...")
-    print(f"🔧 Конфигурация БД: {connection.settings_dict}")
-
-    for i in range(max_retries):
-        try:
-            connection.ensure_connection()
-            print("✅ Подключение к базе данных установлено")
-            return True
-        except OperationalError as e:
-            print(f"⚠️ Ошибка подключения к БД (попытка {i + 1}/{max_retries}): {str(e)}")
-            time.sleep(retry_delay)
-    print("❌ Превышено максимальное количество попыток подключения")
-    return False
-
-
-def run_initialization():
-    """Основная логика инициализации с обработкой ошибок."""
+def run_migrations():
     try:
-        print("🚀 Запуск инициализации базы данных...")
+        print("🚀 Starting database initialization...")
 
-        # Всегда применяем миграции
-        print("🔄 Применение миграций...")
+        # Проверка подключения к базе данных
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                print("✅ Database connection test successful")
+        except OperationalError as e:
+            print(f"❌ Database connection failed: {e}")
+            raise
+
+        # Применяем миграции
+        print("🔄 Applying migrations...")
         call_command("migrate", interactive=False)
 
         # Создаем начальные данные
-        print("✨ Создание начальных данных...")
+        print("✨ Creating initial data...")
         from main.models import Car
 
-        car1, created1 = Car.objects.get_or_create(name="KUZANAGI CT-3X")
-        car2, created2 = Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+        # Создаем автомобили
+        car_names = [
+            "KUZANAGI CT-3X",
+            "QUADRA TURBO-R V-TECH"
+        ]
 
-        print(f"🚗 Машина 1: {'создана' if created1 else 'уже существует'} - {car1.name}")
-        print(f"🚗 Машина 2: {'создана' if created2 else 'уже существует'} - {car2.name}")
+        for name in car_names:
+            car, created = Car.objects.get_or_create(name=name)
+            status = "created" if created else "already exists"
+            print(f"ℹ️ Car '{name}' {status}")
 
-        print("🎉 Инициализация базы данных завершена успешно!")
-        return True
+        car_count = Car.objects.count()
+        print(f"🎉 Database initialization complete! Total cars: {car_count}")
+
+        # Дополнительная проверка
+        print("🔍 Verifying channel layer configuration...")
+        from channels.layers import get_channel_layer
+        try:
+            layer = get_channel_layer()
+            print(f"✅ Channel layer configured: {layer}")
+        except Exception as e:
+            print(f"❌ Channel layer error: {e}")
+
     except Exception as e:
-        print(f"🔥 Критическая ошибка инициализации: {str(e)}")
+        print(f"🔥 Initialization failed: {str(e)}")
         import traceback
         traceback.print_exc()
-        return False
-
-
-if __name__ == "__main__":
-    if wait_for_db():
-        if run_initialization():
-            sys.exit(0)  # Успешное завершение
-        else:
-            sys.exit(1)  # Ошибка инициализации
-    else:
-        sys.exit(2)  # Ошибка подключения к БД
