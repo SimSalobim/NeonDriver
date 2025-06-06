@@ -44,23 +44,31 @@ def toggle_like(request, car_id):
         car.likes.add(user)
         liked = True
 
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "likes_group",
-        {
-            "type": "like_update",
-            "car_id": car_id,
-            "liked": liked,
-            "likes_count": car.likes.count()
-        }
-    )
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            raise ValueError("Channel layer is not configured")
+
+        async_to_sync(channel_layer.group_send)(
+            "likes_group",
+            {
+                "type": "like_update",
+                "car_id": car_id,
+                "liked": liked,
+                "likes_count": car.likes.count()
+            }
+        )
+    except Exception as e:
+        print(f"Error sending WebSocket message: {e}")
+        # Добавляем логгирование для отладки
+        import traceback
+        traceback.print_exc()
 
     return JsonResponse({
         'status': 'success',
         'liked': liked,
         'likes_count': car.likes.count()
     })
-
 
 def get_likes(request, car_id):
     car = get_object_or_404(Car, id=car_id)
