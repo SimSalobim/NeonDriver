@@ -59,8 +59,4 @@ def run_initialization():
 
 
 if __name__ == "__main__":
-    if wait_for_db():
-        success = run_initialization()
-        sys.exit(0 if success else 1)
-    else:
-        sys.exit(1)
+    run_initialization()
