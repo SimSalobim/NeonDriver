@@ -8,6 +8,37 @@ from django.db.utils import OperationalError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 
+# startup.py
+import os
+import django
+from django.core.management import call_command
+
+
+def run_migrations():
+    try:
+        print("=== STARTING INITIALIZATION ===")
+
+        # 1. Применяем миграции
+        print("Applying migrations...")
+        call_command("migrate")
+
+        # 2. Создаем машины
+        print("Creating cars...")
+        from main.models import Car
+        Car.objects.get_or_create(name="KUZANAGI CT-3X")
+        Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+        print("Cars created successfully")
+
+        print("=== INITIALIZATION COMPLETE ===")
+    except Exception as e:
+        print(f"!!! ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+
+        if wait_for_db():
+            run_initialization()
+        else:
+            sys.exit(1)
 
 def wait_for_db():
     """Ожидание доступности базы данных."""
