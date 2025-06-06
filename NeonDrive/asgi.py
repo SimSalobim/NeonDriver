@@ -6,7 +6,7 @@ import main.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 
-# Инициализируем приложение ДО маршрутизации
+# Инициализация приложения ДО маршрутизации
 django_asgi_app = get_asgi_application()
 
 application = ProtocolTypeRouter({
@@ -18,7 +18,7 @@ application = ProtocolTypeRouter({
     ),
 })
 
-# Вызов миграций после инициализации приложения
+# Вызов миграций ПОСЛЕ инициализации приложения
 try:
     from startup import run_migrations
     run_migrations()

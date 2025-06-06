@@ -98,19 +98,22 @@ TEMPLATES = [
     },
 ]
 
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            # Используем те же параметры, что и в DATABASES['default']
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST"),
-            "PORT": os.environ.get("DB_PORT"),
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", os.environ.get("POSTGRES_DB")),
+            "USER": os.environ.get("DB_USER", os.environ.get("POSTGRES_USER")),
+            "PASSWORD": os.environ.get("DB_PASSWORD", os.environ.get("POSTGRES_PASSWORD")),
+            "HOST": os.environ.get("DB_HOST", os.environ.get("POSTGRES_HOST")),
+            "PORT": os.environ.get("DB_PORT", os.environ.get("POSTGRES_PORT", "5432")),
         },
     },
 }
+
+
 WSGI_APPLICATION = 'NeonDrive.wsgi.application'
 
 ASGI_APPLICATION = 'NeonDrive.asgi.application'
@@ -179,3 +182,6 @@ SESSION_COOKIE_SECURE = True
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
 
+
+
+print(f"Channel layers config: {CHANNEL_LAYERS}")
