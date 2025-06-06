@@ -18,6 +18,10 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://neondriver_user:qTwJ
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
+
+if not DATABASES['default']['PORT']:
+    DATABASES['default']['PORT'] = '5432'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 

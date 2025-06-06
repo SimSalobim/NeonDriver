@@ -5,9 +5,9 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
-      python merge_migrations.py  # Слияние конфликтующих миграций
+      python merge_migrations.py
     startCommand: |
-      python startup.py 
+      python startup.py
       daphne NeonDrive.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
       - key: POSTGRES_DB
@@ -19,9 +19,7 @@ services:
           name: neondrive-db
           property: password
       - key: POSTGRES_HOST
-        fromDatabase:
-          name: neondrive-db
-          property: host
+        value: 5432
       - key: SECRET_KEY
         generateValue: true
       - key: DISABLE_COLLECTSTATIC
