@@ -70,13 +70,6 @@ def toggle_like(request, car_id):
     })
 
 
-def get_likes(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    return JsonResponse({
-        'liked': car.user_has_liked(request.user),  # Передаем пользователя
-        'likes_count': car.likes_count
-    })
-
 def cars(request):
     car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
     car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()

@@ -71,7 +71,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const likeChannel = new BroadcastChannel('likes_updates');
+    const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
+
+    socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    updateLikeUI(data.car_id, data);
+    };
     let isProcessing = false;
 
     // Функция для обновления UI

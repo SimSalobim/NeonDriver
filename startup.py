@@ -1,6 +1,6 @@
 
-import os
-import sys
+import django
+django.setup()
 from django.core.management import call_command
 from django.db import connection
 
@@ -10,13 +10,13 @@ def run_migrations():
         print("🚀 Starting database initialization...")
 
         # Проверяем существование таблицы
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT 1 FROM main_car LIMIT 1")
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'main_car')")
+            table_exists = cursor.fetchone()[0]
+
+        if table_exists:
             print("✅ Database already initialized")
             return
-        except Exception as e:
-            print(f"⚠️ Database not ready: {str(e)}")
 
         # Применяем миграции
         print("🔄 Applying migrations...")

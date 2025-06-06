@@ -15,8 +15,17 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 load_dotenv()
-# Build paths inside the project like this: BASE_DIR / 'subdir'
+import sys
+from django.core.wsgi import get_wsgi_application
+from pathlib import Path
+
+# Добавьте путь к проекту
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
+
+
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
@@ -28,7 +37,7 @@ ALLOWED_HOSTS = ['neondriver.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',  # Должен быть первым!
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'channels_postgres',  # Для работы с PostgreSQL
+    'channels_postgres',
     'main',
 ]
 
@@ -71,26 +80,11 @@ TEMPLATES = [
 # WebSocket и ASGI настройки
 ASGI_APPLICATION = 'NeonDrive.asgi.application'
 
-# Настройки каналов с PostgreSQL
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
-        "CONFIG": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB", "neondrive"),
-            "USER": os.environ.get("POSTGRES_USER", "neondrive"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
-            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        },
-    },
-}
-
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
+# Замените блок DATABASES на:
+if os.environ.get('RENDER'):
     DATABASES = {
         'default': dj_database_url.config(
-            default=DATABASE_URL,
+            default=os.getenv('EXTERNAL_DATABASE_URL'),
             conn_max_age=600,
             conn_health_checks=True,
             ssl_require=True
@@ -99,10 +93,29 @@ if DATABASE_URL:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'neondrive',
+            'USER': 'neondriver_user',
+            'PASSWORD': 'qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5',
+            'HOST': 'dpg-d11ifqodl3ps73cr2bng-a',
+            'PORT': '5432',
         }
     }
+
+# Обновите CHANNEL_LAYERS:
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+        "CONFIG": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "neondrive",
+            "USER": "neondriver_user",
+            "PASSWORD": "qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5",
+            "HOST": "dpg-d11ifqodl3ps73cr2bng-a",
+            "PORT": "5432",
+        },
+    },
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

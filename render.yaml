@@ -29,6 +29,8 @@ services:
         value: "False"
       - key: RENDER
         value: "True"
+      - key: EXTERNAL_DATABASE_URL
+        value: postgresql://neondriver_user:qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5@dpg-d11ifqodl3ps73cr2bng-a.frankfurt-postgres.render.com/neondriver
 
 databases:
   - name: neondrive-db
