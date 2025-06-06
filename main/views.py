@@ -41,38 +41,50 @@ def home(request):
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    user = request.user
-    liked = False
-
-    if car.likes.filter(id=user.id).exists():
-        car.likes.remove(user)
-    else:
-        car.likes.add(user)
-        liked = True
-
     try:
-        channel_layer = get_channel_layer()
-        if channel_layer is not None:
-            async_to_sync(channel_layer.group_send)(
-                "likes_group",
-                {
-                    "type": "like_update",
-                    "car_id": car_id,
-                    "liked": liked,
-                    "likes_count": car.likes.count()
-                }
-            )
-        else:
-            print("⚠️ Channel layer is not available")
-    except Exception as e:
-        print(f"⚠️ WebSocket error: {e}")
+        car = get_object_or_404(Car, id=car_id)
+        user = request.user
+        liked = False
 
-    return JsonResponse({
-        'status': 'success',
-        'liked': liked,
-        'likes_count': car.likes.count()
-    })
+        if car.likes.filter(id=user.id).exists():
+            car.likes.remove(user)
+        else:
+            car.likes.add(user)
+            liked = True
+
+        # Сохраняем обновленное состояние
+        car.refresh_from_db()
+
+        # Отправка через WebSocket
+        try:
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    "likes_group",
+                    {
+                        "type": "like_update",
+                        "car_id": car_id,
+                        "liked": liked,
+                        "likes_count": car.likes.count()
+                    }
+                )
+            else:
+                print("⚠️ Channel layer is not available")
+        except Exception as e:
+            print(f"⚠️ WebSocket error: {e}")
+
+        return JsonResponse({
+            'status': 'success',
+            'liked': liked,
+            'likes_count': car.likes.count()
+        })
+
+    except Exception as e:
+        print(f"🔥 Critical error in toggle_like: {e}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 
 class CustomLoginView(LoginView):

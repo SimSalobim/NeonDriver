@@ -24,19 +24,11 @@ env = environ.Env()
 environ.Env.read_env()
 load_dotenv()
 
-if os.path.exists(os.path.join(BASE_DIR, '.env')):
-    env.read_env(os.path.join(BASE_DIR, '.env'))
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://neondriver_user:qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5@dpg-d11ifqodl3ps73cr2bng-a.frankfurt-postgres.render.com/neondriver')
 
-# Конфигурация базы данных
+# Конфигурация основной базы данных
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondriver',  # Имя базы данных
-        'USER': 'neondriver_user',  # Пользователь
-        'PASSWORD': 'qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5',  # Пароль
-        'HOST': 'dpg-d11ifqodl3ps73cr2bng-a',  # Хост
-        'PORT': '5432',  # Порт
-    }
+    'default': dj_database_url.parse(DATABASE_URL)
 }
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -98,7 +90,6 @@ TEMPLATES = [
 ]
 
 
-print(f"Database config: {DATABASES['default']}")
 
 # Конфигурация слоя каналов
 CHANNEL_LAYERS = {
@@ -114,6 +105,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+print(f"Database config: {DATABASES['default']}")
+print(f"Channel layers config: {CHANNEL_LAYERS}")
 
 
 WSGI_APPLICATION = 'NeonDrive.wsgi.application'
