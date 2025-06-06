@@ -1,7 +1,7 @@
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
@@ -44,29 +44,32 @@ def home(request):
 def toggle_like(request, car_id):
     car = get_object_or_404(Car, id=car_id)
     user = request.user
-    liked = False
 
     if car.likes.filter(id=user.id).exists():
         car.likes.remove(user)
+        liked = False
     else:
         car.likes.add(user)
         liked = True
 
+    likes_count = car.likes.count()
+
+    # Отправляем обновление через Channel Layer
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         "likes_group",
         {
             "type": "like_update",
             "car_id": car_id,
-            "liked": liked,
-            "likes_count": car.likes.count()
+            "likes_count": likes_count,
+            "user_has_liked": liked
         }
     )
 
     return JsonResponse({
         'status': 'success',
         'liked': liked,
-        'likes_count': car.likes.count()
+        'likes_count': likes_count
     })
 
 

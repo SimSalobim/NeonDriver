@@ -90,9 +90,12 @@ CHANNEL_LAYERS = {
             "PASSWORD": DATABASES['default']['PASSWORD'],
             "HOST": DATABASES['default']['HOST'],
             "PORT": DATABASES['default']['PORT'],
+            # Добавляем параметр для автоматического создания таблиц
+            "AUTO_CREATE_TABLES": True,
         },
     },
 }
+CONN_MAX_AGE = 600
 print(f"Database config: {DATABASES['default']}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
 
@@ -164,9 +167,3 @@ SESSION_COOKIE_SECURE = True
 
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
-
-try:
-    from startup import run_migrations
-    run_migrations()
-except ImportError as e:
-    print(f"Direct startup error: {e}")

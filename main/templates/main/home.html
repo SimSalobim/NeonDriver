@@ -74,27 +74,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
 
     socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    updateLikeUI(data.car_id, data);
+        const data = JSON.parse(event.data);
+        updateLikeUI(data.car_id, data.likes_count, data.user_has_liked);
     };
-    let isProcessing = false;
 
-    // Функция для обновления UI
-    const updateLikeUI = (carId, data) => {
+    const updateLikeUI = (carId, likesCount, userHasLiked) => {
         const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
         buttons.forEach(button => {
-            button.classList.toggle('liked', data.liked);
-            button.querySelector('.like-icon').textContent = data.liked ? '⚡️' : '🔋';
-            button.querySelector('.like-count').textContent = data.likes_count;
+            button.querySelector('.like-count').textContent = likesCount;
+            button.classList.toggle('liked', userHasLiked);
+            button.querySelector('.like-icon').textContent = userHasLiked ? '⚡️' : '🔋';
         });
     };
 
     // Обработчик кликов
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
-        if (!button || isProcessing) return;
+        if (!button) return;
 
-        isProcessing = true;
         const carId = button.dataset.carId;
 
         try {

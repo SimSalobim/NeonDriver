@@ -5,16 +5,15 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py makemigrations
-      python manage.py migrate
+      python merge_migrations.py  # Слияние конфликтующих миграций
     startCommand: |
-      python startup.py
+      python startup.py 
       daphne NeonDrive.asgi:application --port $PORT --bind 0.0.0.0
     envVars:
       - key: POSTGRES_DB
-        value: neondrive
+        value: neondriver
       - key: POSTGRES_USER
-        value: neondrive
+        value: neondriver_user
       - key: POSTGRES_PASSWORD
         fromDatabase:
           name: neondrive-db
@@ -37,5 +36,5 @@ services:
 databases:
   - name: neondrive-db
     plan: free
-    databaseName: neondrive
-    user: neondrive
+    databaseName: neondriver
+    user: neondriver_user
