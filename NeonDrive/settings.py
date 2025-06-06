@@ -83,22 +83,20 @@ ASGI_APPLICATION = 'NeonDrive.asgi.application'
 # Замените блок DATABASES на:
 if os.environ.get('RENDER'):
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('EXTERNAL_DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=True
-        )
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'neondrive',
+            'USER': 'neondrive_user',
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+            'HOST': os.environ.get('POSTGRES_HOST'),
+            'PORT': '5432',
+        }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'neondrive',
-            'USER': 'neondriver_user',
-            'PASSWORD': 'qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5',
-            'HOST': 'dpg-d11ifqodl3ps73cr2bng-a',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
