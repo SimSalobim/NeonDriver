@@ -6,8 +6,17 @@ import main.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 
-# Инициализация приложения ДО маршрутизации
+# Инициализация приложения
 django_asgi_app = get_asgi_application()
+
+# Запуск миграций
+try:
+    from startup import run_migrations
+    run_migrations()
+except ImportError as e:
+    print(f"Startup import error: {e}")
+except Exception as e:
+    print(f"Initialization error: {e}")
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
@@ -17,12 +26,3 @@ application = ProtocolTypeRouter({
         )
     ),
 })
-
-# Вызов миграций ПОСЛЕ инициализации приложения
-try:
-    from startup import run_migrations
-    run_migrations()
-except ImportError as e:
-    print(f"Startup import error: {e}")
-except Exception as e:
-    print(f"Initialization error: {e}")

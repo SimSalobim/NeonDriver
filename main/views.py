@@ -46,44 +46,25 @@ def toggle_like(request, car_id):
 
     try:
         channel_layer = get_channel_layer()
-        if channel_layer is None:
-            raise ValueError("Channel layer is not configured")
-
-        async_to_sync(channel_layer.group_send)(
-            "likes_group",
-            {
-                "type": "like_update",
-                "car_id": car_id,
-                "liked": liked,
-                "likes_count": car.likes.count()
-            }
-        )
+        if channel_layer is not None:
+            async_to_sync(channel_layer.group_send)(
+                "likes_group",
+                {
+                    "type": "like_update",
+                    "car_id": car_id,
+                    "liked": liked,
+                    "likes_count": car.likes.count()
+                }
+            )
+        else:
+            print("⚠️ Channel layer is not available")
     except Exception as e:
-        print(f"Error sending WebSocket message: {e}")
-        # Добавляем логгирование для отладки
-        import traceback
-        traceback.print_exc()
+        print(f"⚠️ WebSocket error: {e}")
 
     return JsonResponse({
         'status': 'success',
         'liked': liked,
         'likes_count': car.likes.count()
-    })
-
-def get_likes(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    return JsonResponse({
-        'liked': car.user_has_liked(request.user),  # Передаем пользователя
-        'likes_count': car.likes_count
-    })
-
-def cars(request):
-    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
-    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
-
-    return render(request, 'main/cars.html', {
-        'car1': car1,
-        'car2': car2
     })
 
 

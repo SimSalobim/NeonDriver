@@ -24,27 +24,20 @@ env = environ.Env()
 environ.Env.read_env()
 load_dotenv()
 
-# Читаем .env файл, если он существует
 if os.path.exists(os.path.join(BASE_DIR, '.env')):
     env.read_env(os.path.join(BASE_DIR, '.env'))
 
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
-if DATABASE_URL:
-    db_config = dj_database_url.parse(DATABASE_URL)
-
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
-            "CONFIG": {
-                "ENGINE": "django.db.backends.postgresql",
-                "NAME": db_config['NAME'],
-                "USER": db_config['USER'],
-                "PASSWORD": db_config['PASSWORD'],
-                "HOST": db_config['HOST'],
-                "PORT": db_config['PORT'],
-            },
-        },
+# Конфигурация базы данных
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'neondriver',  # Имя базы данных
+        'USER': 'neondriver_user',  # Пользователь
+        'PASSWORD': 'qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5',  # Пароль
+        'HOST': 'dpg-d11ifqodl3ps73cr2bng-a',  # Хост
+        'PORT': '5432',  # Порт
     }
+}
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -105,16 +98,19 @@ TEMPLATES = [
 ]
 
 
+print(f"Database config: {DATABASES['default']}")
+
+# Конфигурация слоя каналов
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DB_NAME", os.environ.get("POSTGRES_DB","neondriver")),
-            "USER": os.environ.get("DB_USER", os.environ.get("POSTGRES_USER","neondriver_user")),
-            "PASSWORD": os.environ.get("DB_PASSWORD", os.environ.get("POSTGRES_PASSWORD","qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5")),
-            "HOST": os.environ.get("DB_HOST", os.environ.get("POSTGRES_HOST","dpg-d11ifqodl3ps73cr2bng-a")),
-            "PORT": os.environ.get("DB_PORT", os.environ.get("POSTGRES_PORT", "5432")),
+            "NAME": DATABASES['default']['NAME'],
+            "USER": DATABASES['default']['USER'],
+            "PASSWORD": DATABASES['default']['PASSWORD'],
+            "HOST": DATABASES['default']['HOST'],
+            "PORT": DATABASES['default']['PORT'],
         },
     },
 }
