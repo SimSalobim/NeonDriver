@@ -164,3 +164,9 @@ SESSION_COOKIE_SECURE = True
 
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
+
+try:
+    from startup import run_migrations
+    run_migrations()
+except ImportError as e:
+    print(f"Direct startup error: {e}")
