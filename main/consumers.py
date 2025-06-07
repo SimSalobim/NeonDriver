@@ -15,17 +15,12 @@ class LikeConsumer(AsyncWebsocketConsumer):
                 await self.close()
                 return
 
-            # Проверка соединения с Redis
-            try:
-                await self.channel_layer.ping()
-            except Exception as e:
-                logger.error(f"Redis ping failed: {str(e)}")
-                await self.close()
-                return
-
-            await self.channel_layer.group_add("likes_group", self.channel_name)
+            await self.channel_layer.group_add(
+                "likes_group",
+                self.channel_name
+            )
             await self.accept()
-
+            logger.info("WebSocket connection established")
         except Exception as e:
             logger.error(f"Connection error: {str(e)}")
             await self.close()
