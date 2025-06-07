@@ -1,54 +1,41 @@
+# startup.py
 import os
-import sys
+
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.db import connection, OperationalError
+from django.db import connection
 
 
 def run_migrations():
+    """Выполняет миграции и создает начальные данные"""
     try:
-        print("🚀 Starting database initialization...")
-
-        # Проверка подключения к базе данных
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT 1")
-                print("✅ Database connection test successful")
-        except OperationalError as e:
-            print(f"❌ Database connection failed: {e}")
-            raise
+        print("Database initialization started...")
 
         # Применяем миграции
-        print("🔄 Applying migrations...")
-        call_command("migrate", interactive=False)
-
-        # Создаем начальные данные
-        print("✨ Creating initial data...")
-        from main.models import Car
-
-        # Создаем автомобили
-        car_names = [
-            "KUZANAGI CT-3X",
-            "QUADRA TURBO-R V-TECH"
-        ]
-
-        for name in car_names:
-            car, created = Car.objects.get_or_create(name=name)
-            status = "created" if created else "already exists"
-            print(f"ℹ️ Car '{name}' {status}")
-
-        car_count = Car.objects.count()
-        print(f"🎉 Database initialization complete! Total cars: {car_count}")
-
-        # Дополнительная проверка
-        print("🔍 Verifying channel layer configuration...")
-        from channels.layers import get_channel_layer
+        call_command("migrate")
+        User = get_user_model()
+        username = os.environ.get('ADMIN_USER', 'admin')
+        email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+        password = os.environ.get('ADMIN_PASSWORD', 'defaultpassword')
+        # Проверяем существование таблицы
         try:
-            layer = get_channel_layer()
-            print(f"✅ Channel layer configured: {layer}")
-        except Exception as e:
-            print(f"❌ Channel layer error: {e}")
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM main_car LIMIT 1")
+            print("Database already initialized")
+            return
+        except Exception:
+            pass
+        # Создаем начальные данные
+        print("Creating initial data...")
+        from main.models import Car
+        Car.objects.get_or_create(name="KUZANAGI CT-3X")
+        Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
 
+        print("Database initialization complete!")
     except Exception as e:
-        print(f"🔥 Initialization failed: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        print(f"Initialization failed: {e}")
+        # Повторная попытка миграций
+        try:
+            call_command("migrate")
+        except:
+            print("Migration retry failed")

@@ -7,4 +7,6 @@ class MainConfig(AppConfig):
     name = 'main'
 
     def ready(self):
+        # УДАЛИТЬ ВЕСЬ КОД ИЗ ЭТОГО МЕТОДА
+        # Оставьте метод пустым или полностью удалите его
         pass

@@ -10,6 +10,7 @@
     <!-- Фиксированное неоновое меню -->
     <nav class="fixed-menu cyber-glow">
         <a href="{% url 'home' %}" class="neon-link">ГЛАВНАЯ</a>
+        <a href="{% url 'cars' %}" class="neon-link">АВТО</a>
         <a href="{% url 'feedback' %}" class="neon-link">ОБРАТНАЯ СВЯЗЬ</a>
 
     {% if user.is_authenticated %}
@@ -23,12 +24,16 @@
         <a href="{% url 'login' %}" class="neon-link">ВОЙТИ</a>
     {% endif %}
     </nav>
+
+    <!-- Контент -->
     <div class="cyber-container">
         {% block content %}
         {% endblock %}
     </div>
 
+    <!-- Анимация "цифрового дождя" -->
     <div class="matrix-effect"></div>
+
     <script>
         // Валидация форм
         document.querySelectorAll('form').forEach(form => {
@@ -42,6 +47,8 @@
                 });
             });
         });
+
+        // Эффект глитча для имени пользователя
         setInterval(() => {
             document.querySelectorAll('.username-glitch').forEach(element => {
                 element.style.textShadow = `

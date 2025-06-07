@@ -14,10 +14,11 @@ class Car(models.Model):
     name = models.CharField(max_length=100, unique=True)
     likes = models.ManyToManyField(User, related_name='liked_cars', blank=True)
 
-    def user_has_liked(self, user):
-        if not user.is_authenticated:
+    def user_has_liked(self):
+
+        if not self.request.user.is_authenticated:
             return False
-        return self.likes.filter(id=user.id).exists()
+        return self.likes.filter(id=self.request.user.id).exists()
 
     @property
     def likes_count(self):

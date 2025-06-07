@@ -7,6 +7,7 @@
 
 <div class="car-list">
     <!-- Первая машина -->
+
     <div class="car-item cyber-block">
         <h2 class="car-name">{{ car1.name }}</h2>
         <img src="{% static 'images/car1.jpg' %}" alt="Kusanagi CT-3X" class="car-image glow">
@@ -22,10 +23,10 @@
 
         <div class="like-system">
             {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car1.user_has_liked_value %}liked{% endif %}"
+                <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
                         data-car-id="{{ car1.id }}">
                     <span class="like-icon">
-                        {% if car1.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
+                        {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
                     </span>
                     <span class="like-count neon-cyan">{{ car1.likes_count }}</span>
                 </button>
@@ -37,7 +38,9 @@
         </div>
     </div>
 
+
     <!-- Вторая машина -->
+    {% if car2 %}
     <div class="car-item cyber-block">
         <h2 class="car-name">{{ car2.name }}</h2>
         <img src="{% static 'images/car2.jpg' %}" alt="Quadra Turbo-R" class="car-image glow">
@@ -52,37 +55,30 @@
         </div>
 
         <div class="like-system">
-            {% if user.is_authenticated %}
-                <button class="cyber-button like-btn {% if car2.user_has_liked_value %}liked{% endif %}"
-                        data-car-id="{{ car2.id }}">
-                    <span class="like-icon">
-                        {% if car2.user_has_liked_value %}⚡️{% else %}🔋{% endif %}
-                    </span>
-                    <span class="like-count neon-cyan">{{ car2.likes_count }}</span>
-                </button>
-            {% else %}
-                <div class="login-to-vote">
-                    <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
-                </div>
-            {% endif %}
+    {% if user.is_authenticated %}
+        <button class="cyber-button like-btn {% if car.user_has_liked %}liked{% endif %}"
+                data-car-id="{{ car.id }}">
+            <span class="like-icon">
+                {% if car.user_has_liked %}⚡️{% else %}🔋{% endif %}
+            </span>
+            <span class="like-count neon-cyan">{{ car.likes_count }}</span>
+        </button>
+    {% else %}
+        <div class="login-to-vote">
+            <a href="{% url 'login' %}" class="neon-link">[ ТРЕБУЕТСЯ АВТОРИЗАЦИЯ ]</a>
         </div>
+    {% endif %}
+</div>
     </div>
+    {% endif %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Подключение к WebSocket
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const socket = new WebSocket(`${wsProtocol}${window.location.host}/ws/likes/`);
+    const likeChannel = new BroadcastChannel('likes_updates');
+    let isProcessing = false;
 
-    socket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        updateLikeUI(data.car_id, {
-            liked: data.liked,
-            likes_count: data.likes_count
-        });
-    };
-
+    // Функция для обновления UI
     const updateLikeUI = (carId, data) => {
         const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
         buttons.forEach(button => {
@@ -95,9 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработчик кликов
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
-        if (!button) return;
+        if (!button || isProcessing) return;
 
+        isProcessing = true;
         const carId = button.dataset.carId;
+
         try {
             const response = await fetch(`/toggle-like/${carId}/`, {
                 method: 'POST',
@@ -109,25 +107,48 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) throw new Error('Ошибка сети');
+            const data = await response.json();
+            const url = button.dataset.url;
+
+
+
+            updateLikeUI(carId, data);
+            likeChannel.postMessage({ carId, ...data });
+
         } catch (error) {
             console.error('Ошибка:', error);
+        } finally {
+            isProcessing = false;
         }
     });
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    // Слушатель сообщений из других вкладок
+    likeChannel.onmessage = (event) => {
+        updateLikeUI(event.data.carId, event.data);
+    };
+
+    // Инициализация состояний
+    document.querySelectorAll('.like-btn').forEach(button => {
+        const carId = button.dataset.carId;
+        fetch(`/get-likes/${carId}/`)
+            .then(r => r.json())
+            .then(data => updateLikeUI(carId, data));
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
-});
+    return cookieValue;
+}
 </script>
 {% endblock %}

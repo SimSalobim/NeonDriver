@@ -18,20 +18,27 @@ from pathlib import Path
 import environ
 import dj_database_url
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 environ.Env.read_env()
 load_dotenv()
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://neondriver_user:qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5@dpg-d11ifqodl3ps73cr2bng-a.frankfurt-postgres.render.com/neondriver')
+# Читаем .env файл, если он существует
+if os.path.exists(os.path.join(BASE_DIR, '.env')):
+    env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Конфигурация основной базы данных
-DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL)
-}
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -47,6 +54,16 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 # Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'main',
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,40 +95,7 @@ TEMPLATES = [
     },
 ]
 
-# settings.py
-INSTALLED_APPS = [
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'channels',
-    'channels_postgres',
-    'main',
-]
-
-ASGI_APPLICATION = 'NeonDrive.asgi.application'
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
-        "CONFIG": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": "your_db_name",
-            "USER": "your_db_user",
-            "PASSWORD": "your_db_password",
-            "HOST": "localhost",
-            "PORT": "5432",
-        },
-    },
-}
-print(f"Database config: {DATABASES['default']}")
-print(f"Channel layers config: {CHANNEL_LAYERS}")
-
-
-
+WSGI_APPLICATION = 'NeonDrive.wsgi.application'
 
 
 # Database
@@ -176,6 +160,4 @@ SESSION_COOKIE_SECURE = True
 
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
-
-
 
