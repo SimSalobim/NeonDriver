@@ -1,3 +1,4 @@
+
 import json
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -8,24 +9,20 @@ logger = logging.getLogger(__name__)
 
 class LikeConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Получаем channel_layer явно
         self.channel_layer = get_channel_layer()
+        logger.info(f"Channel layer: {self.channel_layer}")
 
-        logger.info(f"Connecting to channel layer: {self.channel_layer}")
+        try:
+            await self.channel_layer.group_add(
+                "likes_group",
+                self.channel_name
+            )
+            await self.accept()
+            logger.info("WebSocket connection established")
+        except Exception as e:
+            logger.error(f"Error in group_add: {str(e)}")
+            await self.close()
 
-        if self.channel_layer is None:
-            logger.error("Channel layer is None in connect!")
-        else:
-            try:
-                await self.channel_layer.group_add(
-                    "likes_group",
-                    self.channel_name
-                )
-                await self.accept()
-                logger.info("WebSocket connection established")
-            except Exception as e:
-                logger.error(f"Error in group_add: {str(e)}")
-                await self.close()
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("likes_group", self.channel_name)
 

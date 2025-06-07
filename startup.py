@@ -36,14 +36,13 @@ def run_initialization():
     try:
         print("🚀 Запуск инициализации базы данных...")
 
-        # Применяем все миграции
+        # Создаем миграции для приложения main
+        print("🔄 Создание миграций...")
+        call_command("makemigrations", "main", interactive=False)
+
+        # Применяем миграции
         print("🔄 Применение миграций...")
         call_command("migrate", interactive=False)
-
-        # Специальная команда для инициализации channel layers
-        from channels_postgres.core import PostgresChannelLayer
-        layer = PostgresChannelLayer(CHANNEL_LAYERS['default']['CONFIG'])
-        print(f"✅ Channel layer initialized: {layer}")
 
         # Создаем начальные данные
         print("✨ Создание начальных данных...")

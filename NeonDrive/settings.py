@@ -89,14 +89,12 @@ TEMPLATES = [
 
 
 
-# Конфигурация слоя каналов
-
-# Обновим конфигурацию CHANNEL_LAYERS
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            "DATABASE": DATABASE_URL.replace('postgresql://', 'postgres://', 1),
+            # Передаём весь словарь настроек БД
+            **DATABASES['default'],
             "AUTO_CREATE_TABLES": True,
         },
     },
