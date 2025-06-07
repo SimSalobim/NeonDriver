@@ -7,11 +7,9 @@ from django.db import connection
 from django.db.utils import OperationalError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
-django.setup()  # Важно: инициализация Django до работы с моделями
-
+django.setup()
 
 def wait_for_db():
-    """Ожидание доступности базы данных с подробным выводом."""
     max_retries = 15
     retry_delay = 3
 
@@ -73,8 +71,8 @@ def run_initialization():
 if __name__ == "__main__":
     if wait_for_db():
         if run_initialization():
-            sys.exit(0)  # Успешное завершение
+            sys.exit(0)
         else:
-            sys.exit(1)  # Ошибка инициализации
+            sys.exit(1)
     else:
-        sys.exit(2)  # Ошибка подключения к БД
+        sys.exit(2)

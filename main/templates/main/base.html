@@ -7,7 +7,6 @@
 </head>
 
 <body class="cyber-bg">
-    <!-- Фиксированное неоновое меню -->
     <nav class="fixed-menu cyber-glow">
         <a href="{% url 'home' %}" class="neon-link">ГЛАВНАЯ</a>
         <a href="{% url 'feedback' %}" class="neon-link">ОБРАТНАЯ СВЯЗЬ</a>
@@ -30,7 +29,6 @@
 
     <div class="matrix-effect"></div>
     <script>
-        // Валидация форм
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const inputs = this.querySelectorAll('input');

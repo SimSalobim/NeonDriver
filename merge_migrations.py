@@ -7,12 +7,11 @@ from django.db import connection
 from django.db.utils import OperationalError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
-django.setup()  # Переносим сюда инициализацию Django
-
+django.setup()
 
 def wait_for_db():
     """Ожидание доступности базы данных."""
-    max_retries = 15  # Увеличим количество попыток
+    max_retries = 15
     retry_delay = 3
 
     for i in range(max_retries):
@@ -26,9 +25,7 @@ def wait_for_db():
     print("❌ Max retries reached. Database still not available.")
     return False
 
-
 def run_initialization():
-    """Основная логика инициализации."""
     try:
         print("🚀 Starting database initialization...")
 

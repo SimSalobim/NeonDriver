@@ -23,7 +23,6 @@ def home(request):
         car1 = Car.objects.get_or_create(name="Kusanagi CT-3X")[0]
         car2 = Car.objects.get_or_create(name="Quadra Turbo-R V-Tech")[0]
 
-    # Добавляем информацию о лайках
     if request.user.is_authenticated:
         car1.user_has_liked_value = car1.user_has_liked(request.user)
         car2.user_has_liked_value = car2.user_has_liked(request.user)
@@ -59,7 +58,6 @@ def toggle_like(request, car_id):
 
         likes_count = car.likes.count()
 
-        # Всегда возвращаем JSON-ответ
         response_data = {
             'status': 'success',
             'liked': liked,
@@ -95,10 +93,8 @@ class CustomLoginView(LoginView):
     form_class = LoginForm
     redirect_authenticated_user = True
 
-
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('home')
-
 
 def register(request):
     if request.method == 'POST':
@@ -128,7 +124,6 @@ def feedback(request):
 
         feedback_entry = Feedback.objects.create(name=name, email=email, message=message)
 
-        # Telegram отправка
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
         chat_id = os.getenv("TELEGRAM_CHAT_ID")
         text = f"Новое сообщение!\nИмя: {name}\nEmail: {email}\nСообщение: {message}"

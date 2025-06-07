@@ -71,10 +71,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Создаем WebSocket соединение
     const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
-
-    // Обработчик входящих сообщений
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
@@ -86,28 +83,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Функция обновления интерфейса
     const updateLikeUI = (carId, likesCount, userHasLiked) => {
         const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
         buttons.forEach(button => {
-            // Обновляем счетчик лайков
             const countElement = button.querySelector('.like-count');
             if (countElement) {
                 countElement.textContent = likesCount;
             }
-
-            // Обновляем иконку
             const iconElement = button.querySelector('.like-icon');
             if (iconElement) {
                 iconElement.textContent = userHasLiked ? '⚡️' : '🔋';
             }
-
-            // Обновляем класс для стилизации
             button.classList.toggle('liked', userHasLiked);
         });
     };
-
-    // Обработчик кликов по кнопке лайка
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
         if (!button) return;
@@ -130,8 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Ошибка сети');
             const data = await response.json();
-
-            // Обновляем UI сразу после успешного запроса
             if (data.status === 'success') {
                 updateLikeUI(carId, data.likes_count, data.liked);
             }
@@ -144,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Функция для получения CSRF токена
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

@@ -6,7 +6,6 @@ import os
 
 logger = logging.getLogger(__name__)
 
-
 class LikeConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
