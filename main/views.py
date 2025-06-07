@@ -37,17 +37,24 @@ def home(request):
         'user': request.user
     })
 
-
 import logging
 
 logger = logging.getLogger(__name__)
-
-
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    # ... код до отправки в channel_layer ...
+    car = get_object_or_404(Car, id=car_id)
+    user = request.user
+
+    if car.likes.filter(id=user.id).exists():
+        car.likes.remove(user)
+        liked = False
+    else:
+        car.likes.add(user)
+        liked = True
+
+    likes_count = car.likes.count()
 
     channel_layer = get_channel_layer()
 
@@ -73,17 +80,6 @@ def toggle_like(request, car_id):
         'liked': liked,
         'likes_count': likes_count
     })
-
-
-def cars(request):
-    car1 = Car.objects.filter(name="KUZANAGI CT-3X").first()
-    car2 = Car.objects.filter(name="QUADRA TURBO-R V-TECH").first()
-
-    return render(request, 'main/cars.html', {
-        'car1': car1,
-        'car2': car2
-    })
-
 
 class CustomLoginView(LoginView):
     template_name = 'main/login.html'

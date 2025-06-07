@@ -6,8 +6,6 @@ from django.core.management import call_command
 from django.db import connection
 from django.db.utils import OperationalError
 
-from NeonDrive.settings import CHANNEL_LAYERS
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 django.setup()  # Важно: инициализация Django до работы с моделями
 
@@ -53,6 +51,13 @@ def run_initialization():
 
         print(f"🚗 Машина 1: {'создана' if created1 else 'уже существует'} - {car1.name}")
         print(f"🚗 Машина 2: {'создана' if created2 else 'уже существует'} - {car2.name}")
+
+        from channels_postgres.core import PostgresChannelLayer
+        from django.conf import settings
+
+        config = settings.CHANNEL_LAYERS['default']['CONFIG']
+        layer = PostgresChannelLayer(config)
+        print(f"✅ Channel layer initialized: {layer}")
 
         print("🎉 Инициализация базы данных завершена успешно!")
         return True

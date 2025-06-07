@@ -87,14 +87,16 @@ TEMPLATES = [
     },
 ]
 
-
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            # Передаём весь словарь настроек БД
-            **DATABASES['default'],
+            # Передаем только необходимые параметры
+            "NAME": DATABASES['default']['NAME'],
+            "USER": DATABASES['default']['USER'],
+            "PASSWORD": DATABASES['default']['PASSWORD'],
+            "HOST": DATABASES['default']['HOST'],
+            "PORT": DATABASES['default']['PORT'],
             "AUTO_CREATE_TABLES": True,
         },
     },
