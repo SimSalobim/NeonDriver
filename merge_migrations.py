@@ -1,27 +1,58 @@
-# merge_migrations.py
 import os
-import subprocess
+import sys
+import time
+import django
+from django.core.management import call_command
+from django.db import connection
+from django.db.utils import OperationalError
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
+django.setup()  # Переносим сюда инициализацию Django
 
 
-def merge_migrations():
+def wait_for_db():
+    """Ожидание доступности базы данных."""
+    max_retries = 15  # Увеличим количество попыток
+    retry_delay = 3
+
+    for i in range(max_retries):
+        try:
+            connection.ensure_connection()
+            print("✅ Database connection established")
+            return True
+        except OperationalError:
+            print(f"⚠️ Database not ready, retrying... ({i + 1}/{max_retries})")
+            time.sleep(retry_delay)
+    print("❌ Max retries reached. Database still not available.")
+    return False
+
+
+def run_initialization():
+    """Основная логика инициализации."""
     try:
-        # Проверяем наличие конфликтующих миграций
-        migrations_dir = "main/migrations"
-        files = os.listdir(migrations_dir)
-        conflicting = [f for f in files if f.startswith("0002") and f.endswith(".py")]
+        print("🚀 Starting database initialization...")
 
-        if len(conflicting) > 1:
-            print("Detected conflicting migrations, running merge...")
-            # Выполняем команду слияния
-            result = subprocess.run(
-                ["python", "manage.py", "makemigrations", "--merge", "--noinput"],
-                capture_output=True,
-                text=True
-            )
-            print(result.stdout)
-            if result.returncode != 0:
-                print(f"Merge failed: {result.stderr}")
-        else:
-            print("No conflicting migrations found")
+        # Всегда применяем миграции
+        print("🔄 Applying migrations...")
+        call_command("migrate", interactive=False)
+
+        # Создаем начальные данные, если их нет
+        print("✨ Creating initial data...")
+        from main.models import Car
+
+        # Безопасное создание объектов
+        Car.objects.get_or_create(name="KUZANAGI CT-3X")
+        Car.objects.get_or_create(name="QUADRA TURBO-R V-TECH")
+
+        print("🎉 Database initialization complete!")
     except Exception as e:
-        print(f"Merge error: {str(e)}")
+        print(f"🔥 Initialization error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+
+if __name__ == "__main__":
+    if wait_for_db():
+        run_initialization()
+    else:
+        sys.exit(1)
