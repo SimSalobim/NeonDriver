@@ -25,19 +25,29 @@ def home(request):
         'user': request.user  # Добавьте эту строку
     })
 
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    user = request.user
-    liked = False
+    # ... существующий код ...
 
-    if car.likes.filter(id=user.id).exists():
-        car.likes.remove(user)
-    else:
-        car.likes.add(user)
-        liked = True
+    # После сохранения лайка
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "likes",
+        {
+            "type": "like_update",
+            "data": {
+                "car_id": car_id,
+                "likes_count": car.likes.count()
+            }
+        }
+    )
 
     return JsonResponse({
         'status': 'success',

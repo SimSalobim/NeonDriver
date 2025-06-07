@@ -70,16 +70,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const likeChannel = new BroadcastChannel('likes_updates');
-    let isProcessing = false;
-    const updateLikeUI = (carId, data) => {
-        const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
-        buttons.forEach(button => {
-            button.classList.toggle('liked', data.liked);
-            button.querySelector('.like-icon').textContent = data.liked ? '⚡️' : '🔋';
-            button.querySelector('.like-count').textContent = data.likes_count;
-        });
+    const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        updateLikeCounter(data.car_id, data.likes_count);
     };
+
+    function updateLikeCounter(carId, count) {
+        document.querySelectorAll(`.like-btn[data-car-id="${carId}"] .like-count`)
+            .forEach(span => span.textContent = count);
+    }
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
         if (!button || isProcessing) return;
