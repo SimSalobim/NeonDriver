@@ -1,12 +1,15 @@
 import os
-import django  # Добавьте этот импорт
+import django
+import logging
 from django.core.asgi import get_asgi_application
 
-# Важно: сначала установить переменные окружения
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
-django.setup()  # Теперь это будет работать корректно
 
-# Затем импортировать остальные модули
+django.setup()
+
+logger = logging.getLogger(__name__)
+logger.info("ASGI application initialized")
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import main.routing

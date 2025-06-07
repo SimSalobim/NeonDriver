@@ -17,7 +17,7 @@ if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 else:
     print(f"ℹ️ {env_path} doesn't exist - using environment variables")
-    
+
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://neondriver_user:qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5@dpg-d11ifqodl3ps73cr2bng-a.frankfurt-postgres.render.com/neondriver')
 
 # Конфигурация основной базы данных
@@ -90,20 +90,22 @@ TEMPLATES = [
 
 
 # Конфигурация слоя каналов
+
+# Обновим конфигурацию CHANNEL_LAYERS
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            # Используем строку подключения напрямую
-            "DATABASE": DATABASE_URL,
+            "DATABASE": DATABASE_URL.replace('postgresql://', 'postgres://', 1),
             "AUTO_CREATE_TABLES": True,
         },
     },
 }
-CONN_MAX_AGE = 600
-print(f"Database config: {DATABASES['default']}")
-print(f"Channel layers config: {CHANNEL_LAYERS}")
 
+# Добавим диагностический вывод
+print(f"Database URL: {DATABASE_URL}")
+print(f"Channel layers config: {CHANNEL_LAYERS}")
+print(f"Channel layer backend: {CHANNEL_LAYERS['default']['BACKEND']}")
 
 WSGI_APPLICATION = 'NeonDrive.wsgi.application'
 

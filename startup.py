@@ -6,6 +6,8 @@ from django.core.management import call_command
 from django.db import connection
 from django.db.utils import OperationalError
 
+from NeonDrive.settings import CHANNEL_LAYERS
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'NeonDrive.settings')
 django.setup()  # Важно: инициализация Django до работы с моделями
 
@@ -34,13 +36,14 @@ def run_initialization():
     try:
         print("🚀 Запуск инициализации базы данных...")
 
-        # Создаем миграции для приложения main
-        print("🔄 Создание миграций...")
-        call_command("makemigrations", "main", interactive=False)
-
-        # Применяем миграции
+        # Применяем все миграции
         print("🔄 Применение миграций...")
         call_command("migrate", interactive=False)
+
+        # Специальная команда для инициализации channel layers
+        from channels_postgres.core import PostgresChannelLayer
+        layer = PostgresChannelLayer(CHANNEL_LAYERS['default']['CONFIG'])
+        print(f"✅ Channel layer initialized: {layer}")
 
         # Создаем начальные данные
         print("✨ Создание начальных данных...")

@@ -38,33 +38,33 @@ def home(request):
     })
 
 
+logger = logging.getLogger(__name__)
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    user = request.user
+    # ... код до отправки в channel_layer ...
 
-    if car.likes.filter(id=user.id).exists():
-        car.likes.remove(user)
-        liked = False
-    else:
-        car.likes.add(user)
-        liked = True
-
-    likes_count = car.likes.count()
-
-    # Отправляем обновление через Channel Layer
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "likes_group",
-        {
-            "type": "like_update",
-            "car_id": car_id,
-            "likes_count": likes_count,
-            "user_has_liked": liked
-        }
-    )
+
+    if channel_layer is None:
+        logger.error("Channel layer is None in toggle_like!")
+        return JsonResponse({'status': 'error', 'message': 'Channel layer not initialized'}, status=500)
+
+    try:
+        async_to_sync(channel_layer.group_send)(
+            "likes_group",
+            {
+                "type": "like_update",
+                "car_id": car_id,
+                "likes_count": likes_count,
+                "user_has_liked": liked
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error in group_send: {str(e)}")
 
     return JsonResponse({
         'status': 'success',
