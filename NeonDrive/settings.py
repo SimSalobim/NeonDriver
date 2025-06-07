@@ -18,6 +18,8 @@ from pathlib import Path
 import environ
 import dj_database_url
 
+ASGI_APPLICATION = 'NeonDrive.asgi.application'
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
@@ -111,7 +113,6 @@ print(f"Channel layers config: {CHANNEL_LAYERS}")
 
 WSGI_APPLICATION = 'NeonDrive.wsgi.application'
 
-ASGI_APPLICATION = 'NeonDrive.asgi.application'
 
 
 # Database
