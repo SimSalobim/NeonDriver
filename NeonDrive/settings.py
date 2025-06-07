@@ -76,11 +76,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            "NAME": DATABASES['default']['NAME'],
-            "USER": DATABASES['default']['USER'],
-            "PASSWORD": DATABASES['default']['PASSWORD'],
-            "HOST": DATABASES['default']['HOST'],
-            "PORT": DATABASES['default']['PORT'],
+            "DATABASE": DATABASE_URL.replace('postgresql://', 'postgres://', 1),
             "AUTO_CREATE_TABLES": True,
         },
     },
@@ -154,6 +150,10 @@ CSRF_TRUSTED_ORIGINS = [
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+MIGRATION_MODULES = {
+    'sessions': 'sessions.migrations',
+}
 
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')

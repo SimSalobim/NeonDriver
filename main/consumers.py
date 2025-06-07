@@ -11,7 +11,7 @@ class LikeConsumer(AsyncWebsocketConsumer):
         try:
             self.channel_layer = get_channel_layer()
             if not self.channel_layer:
-                logger.error("Channel layer is not available!")
+                logger.error("Channel layer not available in connect!")
                 await self.close()
                 return
 
@@ -20,7 +20,6 @@ class LikeConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
             await self.accept()
-            logger.info("WebSocket connection established")
         except Exception as e:
             logger.error(f"Connection error: {str(e)}")
             await self.close()

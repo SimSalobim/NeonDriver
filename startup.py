@@ -54,6 +54,12 @@ def run_initialization():
 
         print("🎉 Инициализация базы данных завершена успешно!")
         return True
+        # Очистка сессий
+        print("🧹 Очистка сессий...")
+        from django.contrib.sessions.models import Session
+        Session.objects.all().delete()
+
+        print("🎉 Инициализация базы данных завершена успешно!")
     except Exception as e:
         print(f"🔥 Критическая ошибка инициализации: {str(e)}")
         import traceback
