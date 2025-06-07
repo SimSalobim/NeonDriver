@@ -63,19 +63,15 @@ def toggle_like(request, car_id):
         return JsonResponse({'status': 'error', 'message': 'Channel layer not initialized'}, status=500)
 
     try:
-        channel_layer = get_channel_layer()
-        if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                "likes_group",
-                {
-                    "type": "like_update",
-                    "car_id": car_id,
-                    "likes_count": likes_count,
-                    "user_has_liked": liked
-                }
-            )
-        else:
-            logger.warning("Channel layer not available for group_send")
+        async_to_sync(channel_layer.group_send)(
+            "likes_group",
+            {
+                "type": "like_update",
+                "car_id": car_id,
+                "likes_count": likes_count,
+                "user_has_liked": liked
+            }
+        )
     except Exception as e:
         logger.error(f"Error in group_send: {str(e)}")
 
