@@ -12,6 +12,12 @@ env = environ.Env()
 environ.Env.read_env()
 load_dotenv()
 
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    print(f"ℹ️ {env_path} doesn't exist - using environment variables")
+    
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://neondriver_user:qTwJEDfdqYL0xW5WkmnSbq6dQSYD9Bh5@dpg-d11ifqodl3ps73cr2bng-a.frankfurt-postgres.render.com/neondriver')
 
 # Конфигурация основной базы данных
@@ -88,13 +94,8 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": DATABASES['default']['NAME'],
-            "USER": DATABASES['default']['USER'],
-            "PASSWORD": DATABASES['default']['PASSWORD'],
-            "HOST": DATABASES['default']['HOST'],
-            "PORT": DATABASES['default']['PORT'],
-            # Добавляем параметр для автоматического создания таблиц
+            # Используем строку подключения напрямую
+            "DATABASE": DATABASE_URL,
             "AUTO_CREATE_TABLES": True,
         },
     },
