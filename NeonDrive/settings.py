@@ -91,7 +91,6 @@ TEMPLATES = [
 
 
 
-# Конфигурация слоя каналов
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
@@ -105,6 +104,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
 print(f"Database config: {DATABASES['default']}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
 

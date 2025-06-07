@@ -52,39 +52,24 @@ def toggle_like(request, car_id):
             car.likes.add(user)
             liked = True
 
-        # Сохраняем обновленное состояние
         car.refresh_from_db()
+        likes_count = car.likes.count()
 
         # Отправка через WebSocket
-        try:
-            channel_layer = get_channel_layer()
-            if channel_layer:
-                async_to_sync(channel_layer.group_send)(
-                    "likes_group",
-                    {
-                        "type": "like_update",
-                        "car_id": car_id,
-                        "liked": liked,
-                        "likes_count": car.likes.count()
-                    }
-                )
-            else:
-                print("⚠️ Channel layer is not available")
-        except Exception as e:
-            print(f"⚠️ WebSocket error: {e}")
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "likes_group",
+            {
+                "type": "like_update",
+                "car_id": car_id,
+                "likes_count": likes_count,
+                "liked": liked
+            }
+        )
 
-        return JsonResponse({
-            'status': 'success',
-            'liked': liked,
-            'likes_count': car.likes.count()
-        })
-
+        return JsonResponse({'status': 'success', 'liked': liked, 'likes_count': likes_count})
     except Exception as e:
-        print(f"🔥 Critical error in toggle_like: {e}")
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 class CustomLoginView(LoginView):
