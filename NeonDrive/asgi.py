@@ -16,9 +16,6 @@ from django.conf import settings
 try:
     channel_layer = get_channel_layer()
     logger.info(f"Channel layer initialized: {channel_layer}")
-
-    # Проверим конфигурацию
-    logger.info(f"Channel layer config: {settings.CHANNEL_LAYERS}")
 except Exception as e:
     logger.error(f"Error initializing channel layer: {str(e)}")
     import traceback

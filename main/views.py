@@ -16,12 +16,12 @@ from asgiref.sync import async_to_sync
 
 def home(request):
     try:
-        car1 = Car.objects.get(name="KUZANAGI CT-3X")
-        car2 = Car.objects.get(name="QUADRA TURBO-R V-TECH")
+        car1 = Car.objects.get_or_create(name="Kusanagi CT-3X")[0]
+        car2 = Car.objects.get_or_create(name="Quadra Turbo-R V-Tech")[0]
     except Car.DoesNotExist:
         # Если машины не найдены, создаем пустые объекты
-        car1 = Car(name="KUZANAGI CT-3X")
-        car2 = Car(name="QUADRA TURBO-R V-TECH")
+        car1 = Car.objects.get_or_create(name="Kusanagi CT-3X")[0]
+        car2 = Car.objects.get_or_create(name="Quadra Turbo-R V-Tech")[0]
 
     # Добавляем информацию о лайках
     if request.user.is_authenticated:

@@ -11,6 +11,7 @@ class Feedback(models.Model):
         return f"Сообщение от {self.name}"
 
 class Car(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
     likes = models.ManyToManyField(User, related_name='liked_cars', blank=True)
 

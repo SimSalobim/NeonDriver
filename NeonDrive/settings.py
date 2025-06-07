@@ -32,7 +32,7 @@ if not DATABASES['default']['PORT']:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rwy%w=a7^(3088x2t4v5jlss1lvmtg+*6d-g6#h9ysf(+an905'
+SECRET_KEY = os.environ.get('SECRET_KEY', '9dn&kx=fnyu5t0xmvcim*g#_t=&=_5!f2v_o*h$8crim+&1tzf')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,16 +91,15 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": DATABASES['default']['NAME'],
             "USER": DATABASES['default']['USER'],
             "PASSWORD": DATABASES['default']['PASSWORD'],
             "HOST": DATABASES['default']['HOST'],
             "PORT": DATABASES['default']['PORT'],
-            "AUTO_CREATE_TABLES": True,
         },
     },
 }
-
 # Добавим диагностический вывод
 print(f"Database URL: {DATABASE_URL}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
