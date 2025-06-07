@@ -58,9 +58,9 @@ def toggle_like(request, car_id):
 
     channel_layer = get_channel_layer()
 
-    if channel_layer is None:
-        logger.error("Channel layer is None in toggle_like!")
-        return JsonResponse({'status': 'error', 'message': 'Channel layer not initialized'}, status=500)
+    channel_layer = get_channel_layer()
+    if channel_layer is not None:
+        async_to_sync(channel_layer.group_send)("likes_group", {...})
 
     try:
         async_to_sync(channel_layer.group_send)(

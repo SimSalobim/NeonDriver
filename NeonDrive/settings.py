@@ -89,14 +89,9 @@ TEMPLATES = [
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": DATABASES['default']['NAME'],
-            "USER": DATABASES['default']['USER'],
-            "PASSWORD": DATABASES['default']['PASSWORD'],
-            "HOST": DATABASES['default']['HOST'],
-            "PORT": DATABASES['default']['PORT'],
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
     },
 }
