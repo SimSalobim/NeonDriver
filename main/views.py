@@ -80,8 +80,6 @@ def toggle_like(request, car_id):
                 )
         except Exception as e:
             logger.error(f"Redis error: {str(e)}")
-            # Добавляем информацию об ошибке в ответ
-            response_data['redis_error'] = str(e)
 
         return JsonResponse(response_data)
 

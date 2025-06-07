@@ -38,7 +38,7 @@ class LikeConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'car_id': event['car_id'],
                 'likes_count': event['likes_count'],
-                'user_has_liked': event.get('user_has_liked', False)
+                'user_has_liked': event['user_has_liked']
             }))
         except Exception as e:
             logger.error(f"Error sending update: {str(e)}")

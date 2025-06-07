@@ -105,7 +105,7 @@ else:
             "BACKEND": "channels.layers.InMemoryChannelLayer"
         }
     }
-    
+
 # Добавим диагностический вывод
 print(f"Database URL: {DATABASE_URL}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
