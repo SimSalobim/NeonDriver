@@ -52,7 +52,6 @@ def toggle_like(request, car_id):
             car.likes.add(user)
             liked = True
 
-        car.refresh_from_db()
         likes_count = car.likes.count()
 
         # Отправка через WebSocket
@@ -70,7 +69,6 @@ def toggle_like(request, car_id):
         return JsonResponse({'status': 'success', 'liked': liked, 'likes_count': likes_count})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
 
 class CustomLoginView(LoginView):
     template_name = 'main/login.html'

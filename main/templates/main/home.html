@@ -71,27 +71,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Подключение к WebSocket
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(`${wsProtocol}${window.location.host}/ws/likes/`);
 
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        updateLikeUI(data.car_id, {
+            liked: data.liked,
+            likes_count: data.likes_count
+        });
+    };
 
-const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-const socket = new WebSocket(`${wsProtocol}${window.location.host}/ws/likes/`);
+    const updateLikeUI = (carId, data) => {
+        const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
+        buttons.forEach(button => {
+            button.classList.toggle('liked', data.liked);
+            button.querySelector('.like-icon').textContent = data.liked ? '⚡️' : '🔋';
+            button.querySelector('.like-count').textContent = data.likes_count;
+        });
+    };
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    updateLikeUI(data.car_id, {
-        liked: data.liked,
-        likes_count: data.likes_count
-    });
-};
-
-const updateLikeUI = (carId, data) => {
-    const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
-    buttons.forEach(button => {
-        button.classList.toggle('liked', data.liked);
-        button.querySelector('.like-icon').textContent = data.liked ? '⚡️' : '🔋';
-        button.querySelector('.like-count').textContent = data.likes_count;
-    });
-};
+    // Обработчик кликов
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
         if (!button) return;

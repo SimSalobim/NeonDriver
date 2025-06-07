@@ -1,4 +1,3 @@
-# consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -6,8 +5,8 @@ from .models import Car
 
 class LikeConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
         await self.channel_layer.group_add("likes_group", self.channel_name)
+        await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("likes_group", self.channel_name)

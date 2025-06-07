@@ -18,7 +18,7 @@ from pathlib import Path
 import environ
 import dj_database_url
 
-ASGI_APPLICATION = 'NeonDrive.asgi.application'
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,19 +47,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 # Application definition
-
-INSTALLED_APPS = [
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'channels',
-    'channels_postgres',
-    'main',
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -91,27 +78,39 @@ TEMPLATES = [
     },
 ]
 
+# settings.py
+INSTALLED_APPS = [
+    'daphne',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'channels',
+    'channels_postgres',
+    'main',
+]
 
+ASGI_APPLICATION = 'NeonDrive.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_postgres.core.PostgresChannelLayer",
         "CONFIG": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": DATABASES['default']['NAME'],
-            "USER": DATABASES['default']['USER'],
-            "PASSWORD": DATABASES['default']['PASSWORD'],
-            "HOST": DATABASES['default']['HOST'],
-            "PORT": DATABASES['default']['PORT'],
+            "NAME": "your_db_name",
+            "USER": "your_db_user",
+            "PASSWORD": "your_db_password",
+            "HOST": "localhost",
+            "PORT": "5432",
         },
     },
 }
-
 print(f"Database config: {DATABASES['default']}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
 
 
-WSGI_APPLICATION = 'NeonDrive.wsgi.application'
 
 
 
