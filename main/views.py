@@ -12,6 +12,8 @@ from .models import Feedback, Car
 from .forms import SignUpForm, LoginForm
 import os
 import requests
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 
@@ -26,36 +28,39 @@ def home(request):
     })
 
 
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-
 
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    # ... существующий код ...
+    car = get_object_or_404(Car, id=car_id)
+    user = request.user
+    liked = False
 
-    # После сохранения лайка
+    if car.likes.filter(id=user.id).exists():
+        car.likes.remove(user)
+    else:
+        car.likes.add(user)
+        liked = True
+
+    likes_count = car.likes.count()
+
+    # Отправка обновления через WebSocket
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         "likes",
         {
-            "type": "like_update",
-            "data": {
-                "car_id": car_id,
-                "likes_count": car.likes.count()
-            }
+            "type": "like.update",
+            "car_id": car_id,
+            "likes_count": likes_count
         }
     )
 
     return JsonResponse({
         'status': 'success',
         'liked': liked,
-        'likes_count': car.likes.count()
+        'likes_count': likes_count
     })
-
-
 def get_likes(request, car_id):
     car = get_object_or_404(Car, id=car_id)
     return JsonResponse({

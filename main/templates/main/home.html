@@ -70,7 +70,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
+    const socketProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${socketProtocol}//${window.location.host}/ws/likes/`);
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
@@ -78,9 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function updateLikeCounter(carId, count) {
-        document.querySelectorAll(`.like-btn[data-car-id="${carId}"] .like-count`)
-            .forEach(span => span.textContent = count);
+        const buttons = document.querySelectorAll(`.like-btn[data-car-id="${carId}"]`);
+        buttons.forEach(button => {
+            button.querySelector('.like-count').textContent = count;
+        });
     }
+
+    // Остальной код обработчика кнопок
+    let isProcessing = false;
     document.addEventListener('click', async (e) => {
         const button = e.target.closest('.like-btn');
         if (!button || isProcessing) return;
@@ -96,23 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: 'same-origin'
             });
             if (!response.ok) throw new Error('Ошибка сети');
-            const data = await response.json();
-            updateLikeUI(carId, data);
-            likeChannel.postMessage({ carId, ...data });
         } catch (error) {
             console.error('Ошибка:', error);
         } finally {
             isProcessing = false;
         }
-    });
-    likeChannel.onmessage = (event) => {
-        updateLikeUI(event.data.carId, event.data);
-    };
-    document.querySelectorAll('.like-btn').forEach(button => {
-        const carId = button.dataset.carId;
-        fetch(`/get-likes/${carId}/`)
-            .then(r => r.json())
-            .then(data => updateLikeUI(carId, data));
     });
 });
 
