@@ -73,6 +73,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const socket = new WebSocket(`wss://${window.location.host}/ws/likes/`);
 
+socket.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+    alert('Ошибка подключения к серверу. Лайки в реальном времени недоступны.');
+};
+
+socket.onclose = (event) => {
+    if (event.code !== 1000) {
+        console.warn('WebSocket closed unexpectedly:', event);
+    }
+};
+
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         updateLikeUI(data.car_id, data.likes_count, data.user_has_liked);

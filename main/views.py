@@ -63,23 +63,20 @@ def toggle_like(request, car_id):
         async_to_sync(channel_layer.group_send)("likes_group", {...})
 
     try:
-        async_to_sync(channel_layer.group_send)(
-            "likes_group",
-            {
-                "type": "like_update",
-                "car_id": car_id,
-                "likes_count": likes_count,
-                "user_has_liked": liked
-            }
-        )
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                "likes_group",
+                {
+                    "type": "like_update",
+                    "car_id": car_id,
+                    "likes_count": likes_count,
+                    "user_has_liked": liked
+                }
+            )
     except Exception as e:
-        logger.error(f"Error in group_send: {str(e)}")
-
-    return JsonResponse({
-        'status': 'success',
-        'liked': liked,
-        'likes_count': likes_count
-    })
+        logger.error(f"General error in toggle_like: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 class CustomLoginView(LoginView):
     template_name = 'main/login.html'

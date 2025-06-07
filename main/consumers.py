@@ -11,16 +11,21 @@ class LikeConsumer(AsyncWebsocketConsumer):
         try:
             self.channel_layer = get_channel_layer()
             if not self.channel_layer:
-                logger.error("Channel layer is not available!")
+                logger.error("Channel layer not initialized")
                 await self.close()
                 return
 
-            await self.channel_layer.group_add(
-                "likes_group",
-                self.channel_name
-            )
+            # Проверка соединения с Redis
+            try:
+                await self.channel_layer.ping()
+            except Exception as e:
+                logger.error(f"Redis ping failed: {str(e)}")
+                await self.close()
+                return
+
+            await self.channel_layer.group_add("likes_group", self.channel_name)
             await self.accept()
-            logger.info("WebSocket connection established")
+
         except Exception as e:
             logger.error(f"Connection error: {str(e)}")
             await self.close()
