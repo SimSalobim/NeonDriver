@@ -40,43 +40,57 @@ def home(request):
 import logging
 
 logger = logging.getLogger(__name__)
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def toggle_like(request, car_id):
-    car = get_object_or_404(Car, id=car_id)
-    user = request.user
-
-    if car.likes.filter(id=user.id).exists():
-        car.likes.remove(user)
-        liked = False
-    else:
-        car.likes.add(user)
-        liked = True
-
-    likes_count = car.likes.count()
-
-    channel_layer = get_channel_layer()
-
-    channel_layer = get_channel_layer()
-    if channel_layer is not None:
-        async_to_sync(channel_layer.group_send)("likes_group", {...})
-
     try:
-        channel_layer = get_channel_layer()
-        if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                "likes_group",
-                {
-                    "type": "like_update",
-                    "car_id": car_id,
-                    "likes_count": likes_count,
-                    "user_has_liked": liked
-                }
-            )
+        car = get_object_or_404(Car, id=car_id)
+        user = request.user
+
+        if car.likes.filter(id=user.id).exists():
+            car.likes.remove(user)
+            liked = False
+        else:
+            car.likes.add(user)
+            liked = True
+
+        likes_count = car.likes.count()
+
+        # Всегда возвращаем JSON-ответ
+        response_data = {
+            'status': 'success',
+            'liked': liked,
+            'likes_count': likes_count
+        }
+
+        try:
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    "likes_group",
+                    {
+                        "type": "like_update",
+                        "car_id": car_id,
+                        "likes_count": likes_count,
+                        "user_has_liked": liked
+                    }
+                )
+        except Exception as e:
+            logger.error(f"Redis error: {str(e)}")
+            # Добавляем информацию об ошибке в ответ
+            response_data['redis_error'] = str(e)
+
+        return JsonResponse(response_data)
+
     except Exception as e:
-        logger.error(f"General error in toggle_like: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Error in toggle_like: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 class CustomLoginView(LoginView):
     template_name = 'main/login.html'

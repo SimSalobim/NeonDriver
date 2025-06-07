@@ -88,15 +88,24 @@ TEMPLATES = [
 ]
 REDIS_URL = os.environ.get('REDIS_URL')  # Получаем URL из переменных окружения Render
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [REDIS_URL],  # Используем внешний URL
-            "prefix": "neondrive",
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+                "prefix": "neondrive",
+            },
         },
-    },
-}
+    }
+else:
+    print("⚠️ REDIS_URL environment variable not set!")
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+    
 # Добавим диагностический вывод
 print(f"Database URL: {DATABASE_URL}")
 print(f"Channel layers config: {CHANNEL_LAYERS}")
