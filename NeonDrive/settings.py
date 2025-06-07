@@ -151,9 +151,9 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-MIGRATION_MODULES = {
-    'sessions': 'sessions.migrations',
-}
-
 if 'runserver' not in sys.argv and 'collectstatic' not in sys.argv:
     os.environ.setdefault('RUN_INIT', 'true')
+
+MIGRATION_MODULES = {
+    'sessions': 'django.contrib.sessions.migrations',
+}
