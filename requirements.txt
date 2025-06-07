@@ -3,7 +3,6 @@ django-environ>=0.11.2
 channels-postgres==1.1.2
 psycopg2-binary>=2.9
 dj-database-url>=2.0
-requests>=2.28
 Django==5.0.3
 channels==4.1.0
 daphne==4.1.0
