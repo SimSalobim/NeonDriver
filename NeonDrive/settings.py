@@ -86,13 +86,13 @@ TEMPLATES = [
         },
     },
 ]
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+REDIS_URL = os.environ.get('REDIS_URL')  # Получаем URL из переменных окружения Render
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [REDIS_URL],
+            "hosts": [REDIS_URL],  # Используем внешний URL
             "prefix": "neondrive",
         },
     },

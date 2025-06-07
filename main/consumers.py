@@ -9,18 +9,15 @@ logger = logging.getLogger(__name__)
 class LikeConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
-            self.channel_layer = get_channel_layer()
-            if not self.channel_layer:
-                logger.error("Channel layer not initialized")
+            redis_url = os.environ.get('REDIS_URL')
+            if not redis_url:
+                logger.error("REDIS_URL environment variable not set")
                 await self.close()
                 return
 
-            await self.channel_layer.group_add(
-                "likes_group",
-                self.channel_name
-            )
+            self.channel_layer = get_channel_layer()
+            await self.channel_layer.group_add("likes_group", self.channel_name)
             await self.accept()
-            logger.info("WebSocket connection established")
         except Exception as e:
             logger.error(f"Connection error: {str(e)}")
             await self.close()

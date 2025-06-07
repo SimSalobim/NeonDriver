@@ -53,19 +53,17 @@ def run_initialization():
         print(f"🚗 Машина 2: {'создана' if created2 else 'уже существует'} - {car2.name}")
 
         print("🎉 Инициализация базы данных завершена успешно!")
-        return True
-        redis_url = os.environ.get('REDIS_URL')
-        if redis_url:
+        import os
+        if os.environ.get('REDIS_URL'):
             import redis
             try:
-                r = redis.Redis.from_url(redis_url, socket_connect_timeout=3)
+                r = redis.Redis.from_url(os.environ['REDIS_URL'], socket_connect_timeout=3)
                 r.ping()
                 print("✅ Redis connection successful")
             except Exception as e:
                 print(f"⚠️ Redis connection failed: {str(e)}")
-        else:
-            print("ℹ️ REDIS_URL not set, skipping Redis test")
 
+        return True
     except Exception as e:
         print(f"🔥 Критическая ошибка инициализации: {str(e)}")
         import traceback
