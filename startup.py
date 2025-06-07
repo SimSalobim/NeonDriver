@@ -52,13 +52,6 @@ def run_initialization():
         print(f"🚗 Машина 1: {'создана' if created1 else 'уже существует'} - {car1.name}")
         print(f"🚗 Машина 2: {'создана' if created2 else 'уже существует'} - {car2.name}")
 
-        from channels_postgres.core import PostgresChannelLayer
-        from django.conf import settings
-
-        config = settings.CHANNEL_LAYERS['default']['CONFIG']
-        layer = PostgresChannelLayer(config)
-        print(f"✅ Channel layer initialized: {layer}")
-
         print("🎉 Инициализация базы данных завершена успешно!")
         return True
     except Exception as e:
@@ -66,7 +59,6 @@ def run_initialization():
         import traceback
         traceback.print_exc()
         return False
-
 
 if __name__ == "__main__":
     if wait_for_db():

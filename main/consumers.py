@@ -10,12 +10,10 @@ class LikeConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             self.channel_layer = get_channel_layer()
-            if self.channel_layer is None:
-                logger.error("Channel layer is None in connect!")
+            if not self.channel_layer:
+                logger.error("Channel layer is not available!")
                 await self.close()
                 return
-
-            logger.info(f"Connecting to channel layer: {self.channel_layer}")
 
             await self.channel_layer.group_add(
                 "likes_group",
@@ -23,11 +21,8 @@ class LikeConsumer(AsyncWebsocketConsumer):
             )
             await self.accept()
             logger.info("WebSocket connection established")
-
         except Exception as e:
-            logger.error(f"Error in connect: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
+            logger.error(f"Connection error: {str(e)}")
             await self.close()
 
     async def disconnect(self, close_code):
@@ -38,12 +33,14 @@ class LikeConsumer(AsyncWebsocketConsumer):
                     self.channel_name
                 )
         except Exception as e:
-            logger.error(f"Error in disconnect: {str(e)}")
+            logger.error(f"Disconnection error: {str(e)}")
 
     async def like_update(self, event):
-        # Отправляем обновление всем клиентам
-        await self.send(text_data=json.dumps({
-            'car_id': event['car_id'],
-            'likes_count': event['likes_count'],
-            'user_has_liked': event.get('user_has_liked', False)
-        }))
+        try:
+            await self.send(text_data=json.dumps({
+                'car_id': event['car_id'],
+                'likes_count': event['likes_count'],
+                'user_has_liked': event.get('user_has_liked', False)
+            }))
+        except Exception as e:
+            logger.error(f"Error sending update: {str(e)}")
