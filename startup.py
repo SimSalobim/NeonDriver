@@ -11,7 +11,7 @@ django.setup()  # Важно: инициализация Django до работ�
 
 
 def wait_for_db():
-    """Ожидание доступности базы данных с подробным выводом."""
+    print(f"ℹ️ Using database: {os.environ.get('DATABASE_URL')}")
     max_retries = 15
     retry_delay = 3
 
